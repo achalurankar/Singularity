@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#B35EF5</color>
+    <color name="background">#1F2025</color>
+    <color name="dark_background">#191A1E</color>
+    <color name="label">#9CA3AF</color>
+    <color name="task_adder_value">#8B929E</color>
+    <color name="dark_label">#3C3F41</color>
+    <color name="task_adder_tv_color">#D7D7DD</color>
+    <color name="danger">#FFE4E6</color>
+    <color name="danger_text">#E1204A</color>
+    <color name="purple_500">#FE9148</color>
+    <color name="purple_700">#FD5429</color>
+    <color name="teal_200">#FE9148</color>
+    <color name="teal_700">#FD5429</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="neon_green">#37F713</color>
+    <color name="neon_red">#F61717</color>
+    <color name="orange">#FE9148</color>
+    <color name="dark_orange">#FD5429</color>
+    <color name="light_pink">#F8A9D2</color>
+    <color name="form_bg_et">#F9F8FB</color>
+</resources>
