@@ -150,17 +150,22 @@ public class TaskEditor extends AppCompatActivity {
             int hours = timePicker.getHour();
             int minutes = timePicker.getMinute();
             String meridiem = "";
+            //converting to 12hr format for user perspective
             if (hours > 12) {
                 hours -= 12;
                 meridiem = "PM";
             } else {
-                if (hours == 0)
+                if (hours == 0) {
                     hours = 12;
-                if(hours != 12)
                     meridiem = "AM";
-                else
-                    meridiem = "PM";
+                } else {
+                    if (hours == 12)
+                        meridiem = "PM";
+                    else
+                        meridiem = "AM";
+                }
             }
+            //prepending zero if needed
             String minStr = "", hourStr = "";
             if(minutes < 10)
                 minStr = "0" + minutes;
