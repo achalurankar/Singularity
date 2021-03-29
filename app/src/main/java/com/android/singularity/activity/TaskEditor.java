@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.DatePicker;
@@ -15,6 +14,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.singularity.R;
+import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.DateTime;
 
@@ -45,11 +45,12 @@ public class TaskEditor extends AppCompatActivity {
         CalendarBtn.setOnClickListener(v -> popupCalendar());
         ClockBtn.setOnClickListener(v -> popupClock());
         SaveBtn.setOnClickListener(v -> updateTask());
-        findViewById(R.id.back).setOnClickListener(v -> closeActivity());
+        findViewById(R.id.back).setOnClickListener(v -> finish());
         mTask = TaskList.selectedTask;
-        if(mTask != null){
+        if (mTask != null) {
             setupForm();
-        }
+        } else
+            Date.setText(TaskList.CurrentDateForEditor);
     }
 
     private void setupForm() {
@@ -65,7 +66,7 @@ public class TaskEditor extends AppCompatActivity {
         String date = Date.getText().toString();
         String description = Description.getText().toString().trim();
         String taskId;
-        if(mTask == null)
+        if (mTask == null)
             taskId = System.currentTimeMillis() + "";
         else
             taskId = mTask.getId();
@@ -99,20 +100,17 @@ public class TaskEditor extends AppCompatActivity {
         rows.put("date_time", dateTimeValue);
 
         //inserting values to db
-        if(mTask == null) {
+        if (mTask == null) {
             dbRef.insert("tasks", null, rows);
             Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
         } else {
             String[] args = new String[]{taskId};
-            dbRef.update("tasks", rows,"task_id = ?", args);
+            dbRef.update("tasks", rows, "task_id = ?", args);
             Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
         }
-        closeActivity();
-    }
-
-    private void closeActivity() {
-        startActivity(new Intent(getApplicationContext(), TaskList.class));
-        overridePendingTransition(0, 0);
+        //call event change listener invoker
+        EventDispatcher.callOnDataChange();
+        //close current activity
         finish();
     }
 
@@ -167,11 +165,11 @@ public class TaskEditor extends AppCompatActivity {
             }
             //prepending zero if needed
             String minStr = "", hourStr = "";
-            if(minutes < 10)
+            if (minutes < 10)
                 minStr = "0" + minutes;
             else
                 minStr = minutes + "";
-            if(hours < 10)
+            if (hours < 10)
                 hourStr = "0" + hours;
             else
                 hourStr = hours + "";
@@ -184,6 +182,6 @@ public class TaskEditor extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        closeActivity();
+        finish();
     }
 }

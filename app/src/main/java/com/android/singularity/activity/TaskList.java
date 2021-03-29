@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.singularity.R;
+import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.modal.Task;
 import com.google.android.material.snackbar.Snackbar;
@@ -41,6 +42,9 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
     TextView DateTV, DayTV;
     static Task selectedTask;
     LinearLayout NoResultsLayout;
+
+    //current date for editor
+    static String CurrentDateForEditor = "Select Date";
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -70,6 +74,8 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         setDayDate(currentDate);
         getTasks(currentDate);
         setupLeftRightDrags();
+        //add database change listener
+        EventDispatcher.addEventListener(() -> getTasks(DateTV.getText().toString()));
     }
 
     private void setupLeftRightDrags() {
@@ -87,9 +93,9 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
 
     private void openTaskAdder() {
         selectedTask = null;
+        CurrentDateForEditor = DateTV.getText().toString();
         startActivity(new Intent(getApplicationContext(), TaskEditor.class));
         overridePendingTransition(0, 0);
-        finish();
     }
 
     @Override
@@ -149,9 +155,7 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
                 int index = viewHolder.getLayoutPosition();
                 Task item = mList.get(index);
                 removeFromDatabase(item);
-                mList.remove(index);
-                mAdapter = new CustomAdapter(TaskList.this, mList);
-                mRecyclerView.setAdapter(mAdapter);
+                EventDispatcher.callOnDataChange();
                 Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", Snackbar.LENGTH_LONG);
                 snackbar.setAction("UNDO", v -> {
                     restoreIntoDatabase(item);
@@ -239,9 +243,9 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
             int isNotified = task.getIsNotified();
             holder.Item.setOnClickListener(v -> {
                 selectedTask = task;
+                CurrentDateForEditor = DateTV.getText().toString();
                 startActivity(new Intent(getApplicationContext(), TaskEditor.class));
                 overridePendingTransition(0, 0);
-                finish();
             });
             String tt = task.getTime();
             String[] tt_arr = tt.split(":");
