@@ -14,6 +14,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.singularity.R;
+import com.android.singularity.service.Scheduler;
+import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.DateTime;
@@ -65,10 +67,8 @@ public class TaskEditor extends AppCompatActivity {
         String name = TaskName.getText().toString().trim();
         String date = Date.getText().toString();
         String description = Description.getText().toString().trim();
-        String taskId;
-        if (mTask == null)
-            taskId = System.currentTimeMillis() + "";
-        else
+        String taskId = null;
+        if (mTask != null)
             taskId = mTask.getId();
         int isNotified = 0;
         int isCompleted = 0;
@@ -87,27 +87,17 @@ public class TaskEditor extends AppCompatActivity {
             return;
         }
 
-        //setting row values
-        ContentValues rows = new ContentValues();
-        rows.put("task_id", taskId);
-        rows.put("task_name", name);
-        rows.put("task_date", date);
-        rows.put("task_time", TimeValue);
-        rows.put("description", description);
-        rows.put("is_notified", isNotified);
-        rows.put("is_completed", isCompleted);
-        String dateTimeValue = DateTime.getDateTimeValue(date, TimeValue);
-        rows.put("date_time", dateTimeValue);
-
-        //inserting values to db
+        //upsert task
+        Task task = new Task(taskId, name, date, TimeValue, description, isNotified, isCompleted);
+        DbQuery dbQuery = new DbQuery(this);
+        dbQuery.upsertTask(task);
         if (mTask == null) {
-            dbRef.insert("tasks", null, rows);
             Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
         } else {
-            String[] args = new String[]{taskId};
-            dbRef.update("tasks", rows, "task_id = ?", args);
             Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
         }
+        // schedule task in future
+        Scheduler.schedule(task, this);
         //call event change listener invoker
         EventDispatcher.callOnDataChange();
         //close current activity

@@ -58,7 +58,7 @@ public class Task {
         this.description = description;
     }
 
-    public int getIsNotified() {
+    public int isNotified() {
         return isNotified;
     }
 
@@ -66,7 +66,7 @@ public class Task {
         this.isNotified = isNotified;
     }
 
-    public int getIsCompleted() {
+    public int isCompleted() {
         return isCompleted;
     }
 

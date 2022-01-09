@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.singularity.R;
+import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.modal.Task;
@@ -54,14 +55,6 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         DayTV = findViewById(R.id.day);
         NoResultsLayout = findViewById(R.id.no_result_layout);
         dbRef = openOrCreateDatabase("singularity", MODE_PRIVATE, null);
-        dbRef.execSQL("CREATE TABLE IF NOT EXISTS tasks(task_id VARCHAR, " +
-                "task_name VARCHAR, " +
-                "task_date VARCHAR, " +
-                "task_time VARCHAR, " +
-                "description VARCHAR, " +
-                "is_notified int, " +
-                "is_completed int, " +
-                "date_time DATETIME);");
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, mList));
         mRecyclerView.setHasFixedSize(true);
@@ -111,34 +104,16 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
     }
 
     void getTasks(String inputDate) {
-        mList.clear();
         NoResultsLayout.setVisibility(View.INVISIBLE);
-        String[] args = new String[]{inputDate};
-        Cursor cursor = dbRef.rawQuery("SELECT * from tasks WHERE task_date = ? ORDER BY is_completed, date_time;", args);
-        cursor.moveToFirst();
-        if (cursor.getCount() != 0) {
-            String id, name, desc, date, time;
-            int isNotified, isCompleted;
-            for (int i = 0; i < cursor.getCount(); i++) {
-                id = cursor.getString(0);
-                name = cursor.getString(1);
-                date = cursor.getString(2);
-                time = cursor.getString(3);
-                desc = cursor.getString(4);
-                isNotified = cursor.getInt(5);
-                isCompleted = cursor.getInt(6);
-                Task task = new Task(id, name, date, time, desc, isNotified, isCompleted);
-                mList.add(task);
-                cursor.moveToNext();
-            }
+        DbQuery dbQuery = new DbQuery(this);
+        mList = dbQuery.getTasks(inputDate);
+        if (mList.size() != 0) {
             mAdapter = new CustomAdapter(TaskList.this, mList);
             mRecyclerView.setAdapter(mAdapter);
         } else {
             NoResultsLayout.setVisibility(View.VISIBLE);
             mRecyclerView.setAdapter(null);
         }
-        if (!cursor.isClosed())
-            cursor.close();
     }
 
     void setTouchCallback() {
@@ -169,14 +144,15 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
     }
 
     private void restoreIntoDatabase(Task item) {
+        //todo add delay for snackbar and then delete the item
         ContentValues rows = new ContentValues();
         rows.put("task_id", item.getId());
         rows.put("task_name", item.getName());
         rows.put("task_date", item.getDate());
         rows.put("task_time", item.getTime());
         rows.put("description", item.getDescription());
-        rows.put("is_notified", item.getIsNotified());
-        rows.put("is_completed", item.getIsCompleted());
+        rows.put("is_notified", item.isNotified());
+        rows.put("is_completed", item.isCompleted());
         String dateTimeValue = DateTime.getDateTimeValue(item.getDate(), item.getTime());
         rows.put("date_time", dateTimeValue);
         dbRef.insert("tasks", null, rows);
@@ -239,8 +215,8 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
             Task task = mList.get(position);
             holder.Name.setText(task.getName());
             holder.Description.setText(task.getDescription().length() == 0 ? "No description provided" : task.getDescription());
-            int isCompleted = task.getIsCompleted();
-            int isNotified = task.getIsNotified();
+            int isCompleted = task.isCompleted();
+            int isNotified = task.isNotified();
             holder.Item.setOnClickListener(v -> {
                 selectedTask = task;
                 CurrentDateForEditor = DateTV.getText().toString();
@@ -260,30 +236,6 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
                 holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
             } else
                 holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
-
-            //check missed task code, not needed
-//            if (task_med.equals("PM")) {
-//                if (task_hour == 12)
-//                    task_hour = 0;
-//                else
-//                    task_hour += 12;
-//            } else {
-//                if (task_hour == 12)
-//                    task_hour = 0;
-//            }
-//            if (task_hour < date.getHour()) {
-//                holder.CompleteBtn.setVisibility(View.INVISIBLE);
-//                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.task_missed_status));
-//                return;
-//            }
-//            if (task_hour > date.getHour()) {
-//                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
-//                return;
-//            }
-//            if (task_min < date.getMinute()) {
-//                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.task_missed_status));
-//                return;
-//            }
         }
 
         @Override

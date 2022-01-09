@@ -2,10 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.singularity">
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 
     <application
-        android:name=".controller.AppController"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,16 +22,8 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".service.Foreground"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="com.android.singularity.service.Notification" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </service>
-
+        <receiver android:name=".service.NotificationReceiver"/>
 
         <meta-data
             android:name="preloaded_fonts"
