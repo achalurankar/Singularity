@@ -26,15 +26,12 @@ public class TaskEditor extends AppCompatActivity {
     RelativeLayout CalendarBtn, SaveBtn, ClockBtn;
     TextView Date, TimeTextView;
     String TimeValue = "";
-    SQLiteDatabase dbRef;
     Task mTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_editor);
-        //open DB
-        dbRef = openOrCreateDatabase("singularity", MODE_PRIVATE, null);
         //initialize variables
         TaskName = findViewById(R.id.task_name_et);
         Description = findViewById(R.id.description);

@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,13 +38,14 @@ import java.util.List;
 
 public class TaskList extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String TAG = "TaskList";
     RecyclerView mRecyclerView;
     public CustomAdapter mAdapter;
     List<Task> mList = new ArrayList<>();
-    SQLiteDatabase dbRef;
     TextView DateTV, DayTV;
     static Task selectedTask;
     LinearLayout NoResultsLayout;
+    DbQuery dbQuery;
 
     //current date for editor
     static String CurrentDateForEditor = "Select Date";
@@ -51,14 +54,11 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_list);
+        dbQuery = new DbQuery(this);
         DateTV = findViewById(R.id.date);
         DayTV = findViewById(R.id.day);
         NoResultsLayout = findViewById(R.id.no_result_layout);
-        dbRef = openOrCreateDatabase("singularity", MODE_PRIVATE, null);
-        mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, mList));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
+        configureRecyclerView();
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
         findViewById(R.id.calendar).setOnClickListener(v -> popupCalendar());
         setTouchCallback();
@@ -69,6 +69,13 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         setupLeftRightDrags();
         //add database change listener
         EventDispatcher.addEventListener(() -> getTasks(DateTV.getText().toString()));
+    }
+
+    private void configureRecyclerView() {
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, mList));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
     }
 
     private void setupLeftRightDrags() {
@@ -105,7 +112,6 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
 
     void getTasks(String inputDate) {
         NoResultsLayout.setVisibility(View.INVISIBLE);
-        DbQuery dbQuery = new DbQuery(this);
         mList = dbQuery.getTasks(inputDate);
         if (mList.size() != 0) {
             mAdapter = new CustomAdapter(TaskList.this, mList);
@@ -129,12 +135,18 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
                 //Remove swiped item
                 int index = viewHolder.getLayoutPosition();
                 Task item = mList.get(index);
-                removeFromDatabase(item);
-                EventDispatcher.callOnDataChange();
-                Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", Snackbar.LENGTH_LONG);
+                mList.remove(index);
+                Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
+                Handler handler = new Handler();
+                Runnable runnable = () -> {
+                    snackbar.dismiss();
+                    removeFromDatabase(item);
+                };
+                handler.postDelayed(runnable, 2600);
                 snackbar.setAction("UNDO", v -> {
-                    restoreIntoDatabase(item);
-                    getTasks(DateTV.getText().toString());
+                    handler.removeCallbacks(runnable);
+                    mList.add(index, item);
+                    configureRecyclerView();
                 });
                 snackbar.show();
             }
@@ -143,25 +155,8 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
     }
 
-    private void restoreIntoDatabase(Task item) {
-        //todo add delay for snackbar and then delete the item
-        ContentValues rows = new ContentValues();
-        rows.put("task_id", item.getId());
-        rows.put("task_name", item.getName());
-        rows.put("task_date", item.getDate());
-        rows.put("task_time", item.getTime());
-        rows.put("description", item.getDescription());
-        rows.put("is_notified", item.isNotified());
-        rows.put("is_completed", item.isCompleted());
-        String dateTimeValue = DateTime.getDateTimeValue(item.getDate(), item.getTime());
-        rows.put("date_time", dateTimeValue);
-        dbRef.insert("tasks", null, rows);
-        Toast.makeText(getApplicationContext(), "Task restored!", Toast.LENGTH_SHORT).show();
-    }
-
     private void removeFromDatabase(Task item) {
-        String[] args = new String[]{item.getId()};
-        long result = dbRef.delete("tasks", "task_id = ?", args);
+        dbQuery.deleteTask(item);
     }
 
     //to get date for query
@@ -264,10 +259,8 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
     }
 
     private void setComplete(Task task) {
-        String[] args = new String[]{task.getId()};
-        ContentValues rows = new ContentValues();
-        rows.put("is_completed", 1);
-        dbRef.update("tasks", rows,"task_id = ?", args);
+        task.setIsCompleted(1);
+        dbQuery.upsertTask(task);
         Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
         getTasks(task.getDate());
     }

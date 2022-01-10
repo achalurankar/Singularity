@@ -111,4 +111,9 @@ public class DbQuery {
             return INSERT;
         }
     }
+
+    public void deleteTask(Task task) {
+        String[] args = new String[]{task.getId()};
+        ref.delete("tasks", "task_id = ?", args);
+    }
 }
