@@ -210,8 +210,8 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
             Task task = mList.get(position);
             holder.Name.setText(task.getName());
             holder.Description.setText(task.getDescription().length() == 0 ? "No description provided" : task.getDescription());
-            int isCompleted = task.isCompleted();
-            int isNotified = task.isNotified();
+            int isCompleted = task.getIsCompleted();
+            int isNotified = task.getIsNotified();
             holder.Item.setOnClickListener(v -> {
                 selectedTask = task;
                 CurrentDateForEditor = DateTV.getText().toString();

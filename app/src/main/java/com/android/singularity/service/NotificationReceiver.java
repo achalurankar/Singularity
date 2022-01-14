@@ -27,7 +27,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         Log.e("AlarmReceiver", "onReceive: " + taskId);
         DbQuery dbQuery = new DbQuery(context);
         Task task = dbQuery.getTask(taskId);
-        if(task != null && task.isCompleted() == 0){
+        if(task != null && task.getIsNotified() == 0){
             //show notification for incomplete tasks
             task.setIsNotified(1);
             generateNotification(task, context);
