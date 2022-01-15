@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
-import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.EventDispatcher;
@@ -146,12 +145,12 @@ public class TaskList extends AppCompatActivity {
     }
 
     private void removeFromDatabase(JSONObject item) {
-        // todo delete task
+        JSONObject requestStructure = new JSONObject();
         JSONObject params = new JSONObject();
         try {
-            params.put("id", item.getString("Id"));
-            params.put("action", "delete");
-            Log.e(TAG, "removeFromDatabase: " + params.toString() );
+            requestStructure.put("id", item.getString("Id"));
+            requestStructure.put("action", "delete");
+            params.put("requestStructure", requestStructure.toString());
             CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, response -> {
                 if(response != null)
                     getTasks();
