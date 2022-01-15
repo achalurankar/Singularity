@@ -1,5 +1,6 @@
 package com.android.singularity.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ public class TaskList extends AppCompatActivity {
     RecyclerView mRecyclerView;
     TextView DateTV, DayTV;
     static JSONObject selectedTask;
+    CustomAdapter mAdapter;
     LinearLayout NoResultsLayout;
     JSONArray mList;
 
@@ -64,7 +66,8 @@ public class TaskList extends AppCompatActivity {
     }
 
     public void setRecyclerViewAdapter(JSONArray jsonArray) {
-        mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, jsonArray));
+        mAdapter = new CustomAdapter(TaskList.this, jsonArray);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void setDayDate(String date) {
@@ -79,7 +82,6 @@ public class TaskList extends AppCompatActivity {
     }
 
     void getTasks() {
-        //todo get tasks
         NoResultsLayout.setVisibility(View.INVISIBLE);
         CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), response -> {
             if (response == null) return;
@@ -107,35 +109,25 @@ public class TaskList extends AppCompatActivity {
                 return true;
             }
 
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 // Remove swiped item
-                // todo swiped
                 int index = viewHolder.getLayoutPosition();
-                JSONObject item = null;
-                try {
-                    item = mList.getJSONObject(index);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                mList.remove(index);
-                setRecyclerViewAdapter(mList);
+                JSONObject item = mAdapter.get(index);
+                mAdapter.remove(index);
+                mAdapter.notifyDataSetChanged();
                 Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
                 Handler handler = new Handler();
-                JSONObject finalItem = item;
                 Runnable runnable = () -> {
                     snackbar.dismiss();
-                    removeFromDatabase(finalItem);
+                    removeFromDatabase(item);
                 };
                 handler.postDelayed(runnable, 2600);
                 snackbar.setAction("UNDO", v -> {
                     handler.removeCallbacks(runnable);
-                    try {
-                        mList.put(index, finalItem);
-                        setRecyclerViewAdapter(mList);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    mAdapter.add(index, item);
+                    mAdapter.notifyDataSetChanged();
                 });
                 snackbar.show();
             }
@@ -165,12 +157,46 @@ public class TaskList extends AppCompatActivity {
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
         public final Context mContext;
         JSONArray mList;
-        DateTime date;
 
         public CustomAdapter(Context context, JSONArray list) {
             mContext = context;
             mList = list;
-            date = new DateTime();
+        }
+
+        public JSONObject get(int index) {
+            JSONObject object = null;
+            try {
+                object = this.mList.getJSONObject(index);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return object;
+        }
+
+        public void remove(int index) {
+            mList.remove(index);
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        public void add(int index, JSONObject item) {
+            JSONArray jsonArray = new JSONArray();
+            if(index == mList.length()) {
+                mList.put(item);
+                notifyDataSetChanged();
+                return;
+            }
+            for (int i = 0; i < mList.length(); i++) {
+                if(i == index) {
+                    jsonArray.put(item);
+                }
+                try {
+                    jsonArray.put(mList.getJSONObject(i));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            mList = jsonArray;
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -182,7 +208,6 @@ public class TaskList extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull CustomViewHolder holder, final int position) {
-            // todo manage adapter bind view
             JSONObject task;
             try {
                 task = mList.getJSONObject(position);
@@ -218,6 +243,7 @@ public class TaskList extends AppCompatActivity {
         public int getItemCount() {
             return mList.length();
         }
+
 
         public class CustomViewHolder extends RecyclerView.ViewHolder {
 
