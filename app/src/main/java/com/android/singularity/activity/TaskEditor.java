@@ -3,8 +3,6 @@ package com.android.singularity.activity;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -14,11 +12,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.singularity.R;
-import com.android.singularity.service.Scheduler;
-import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.modal.Task;
-import com.android.singularity.util.DateTime;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class TaskEditor extends AppCompatActivity {
 
@@ -26,7 +24,7 @@ public class TaskEditor extends AppCompatActivity {
     RelativeLayout CalendarBtn, SaveBtn, ClockBtn;
     TextView Date, TimeTextView;
     String TimeValue = "";
-    Task mTask;
+    JSONObject mTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +51,12 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     private void setupForm() {
-        TaskName.setText(mTask.getName());
-        Description.setText(mTask.getDescription());
-        Date.setText(mTask.getDate());
-        TimeTextView.setText(mTask.getTime());
-        TimeValue = mTask.getTime();
+        // todo setup form
+//        TaskName.setText(mTask.getName());
+//        Description.setText(mTask.getDescription());
+//        Date.setText(mTask.getDate());
+//        TimeTextView.setText(mTask.getTime());
+//        TimeValue = mTask.getTime();
     }
 
     private void updateTask() {
@@ -65,8 +64,13 @@ public class TaskEditor extends AppCompatActivity {
         String date = Date.getText().toString();
         String description = Description.getText().toString().trim();
         String taskId = null;
-        if (mTask != null)
-            taskId = mTask.getId();
+        if (mTask != null) {
+            try {
+                taskId = mTask.getString("id");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         int isNotified = 0;
         int isCompleted = 0;
 
@@ -84,17 +88,7 @@ public class TaskEditor extends AppCompatActivity {
             return;
         }
 
-        //upsert task
-        Task task = new Task(taskId, name, date, TimeValue, description, isNotified, isCompleted);
-        DbQuery dbQuery = new DbQuery(this);
-        dbQuery.upsertTask(task);
-        if (mTask == null) {
-            Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
-        }
-        // schedule task in future
-        Scheduler.schedule(task, this);
+        //todo upsert task
         //call event change listener invoker
         EventDispatcher.callOnDataChange();
         //close current activity

@@ -13,7 +13,6 @@
         android:theme="@style/Theme.Singularity.Dark">
         <activity android:name=".activity.TaskList"/>
         <activity android:name=".activity.TaskEditor" />
-        <activity android:name=".activity.Groups" />
         <activity android:name=".activity.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -22,10 +22,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
 import com.android.singularity.modal.Task;
+import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
-import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
+import com.andromeda.callouts.CalloutManager;
+import com.andromeda.callouts.Session;
 import com.google.android.material.snackbar.Snackbar;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,24 +41,24 @@ public class TaskList extends AppCompatActivity {
     private static final String TAG = "TaskList";
     RecyclerView mRecyclerView;
     public CustomAdapter mAdapter;
-    List<Task> mList = new ArrayList<>();
     TextView DateTV, DayTV;
-    static Task selectedTask;
+    static JSONObject selectedTask;
     LinearLayout NoResultsLayout;
-    DbQuery dbQuery;
 
     // current date for editor
     static String CurrentDateForEditor = "Select Date";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_list);
-        dbQuery = new DbQuery(this);
+        Session.storeAccessToken(Constants.ACCESS_TOKEN_ENDPOINT);
         DateTV = findViewById(R.id.date);
         DayTV = findViewById(R.id.day);
         NoResultsLayout = findViewById(R.id.no_result_layout);
-        configureRecyclerView();
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
         setTouchCallback();
         //get today's date and update the view
@@ -63,11 +69,8 @@ public class TaskList extends AppCompatActivity {
         EventDispatcher.addEventListener(this::getTasks);
     }
 
-    private void configureRecyclerView() {
-        mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, mList));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
+    public void setRecyclerViewAdapter(JSONArray jsonArray) {
+        mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, jsonArray));
     }
 
     private void setDayDate(String date) {
@@ -83,15 +86,29 @@ public class TaskList extends AppCompatActivity {
     }
 
     void getTasks() {
+        //todo get tasks
         NoResultsLayout.setVisibility(View.INVISIBLE);
-        mList = dbQuery.getTasks();
-        if (mList.size() != 0) {
-            mAdapter = new CustomAdapter(TaskList.this, mList);
-            mRecyclerView.setAdapter(mAdapter);
-        } else {
-            NoResultsLayout.setVisibility(View.VISIBLE);
-            mRecyclerView.setAdapter(null);
-        }
+        CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), response -> {
+            if (response == null) return;
+            if (response.equals(CalloutManager.TOKEN_INVALID)) {
+                getTasks();
+                return;
+            }
+            try {
+                JSONArray jsonArray = new JSONArray(response);
+                TaskList.this.runOnUiThread(() -> {
+                    if (jsonArray.length() != 0) {
+                        setRecyclerViewAdapter(jsonArray);
+                    } else {
+                        setRecyclerViewAdapter(new JSONArray());
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
+
+
     }
 
     void setTouchCallback() {
@@ -105,22 +122,23 @@ public class TaskList extends AppCompatActivity {
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 //Remove swiped item
-                int index = viewHolder.getLayoutPosition();
-                Task item = mList.get(index);
-                mList.remove(index);
-                Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
-                Handler handler = new Handler();
-                Runnable runnable = () -> {
-                    snackbar.dismiss();
-                    removeFromDatabase(item);
-                };
-                handler.postDelayed(runnable, 2600);
-                snackbar.setAction("UNDO", v -> {
-                    handler.removeCallbacks(runnable);
-                    mList.add(index, item);
-                    configureRecyclerView();
-                });
-                snackbar.show();
+                // todo swiped
+//                int index = viewHolder.getLayoutPosition();
+//                Task item = mList.get(index);
+//                mList.remove(index);
+//                Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
+//                Handler handler = new Handler();
+//                Runnable runnable = () -> {
+//                    snackbar.dismiss();
+//                    removeFromDatabase(item);
+//                };
+//                handler.postDelayed(runnable, 2600);
+//                snackbar.setAction("UNDO", v -> {
+//                    handler.removeCallbacks(runnable);
+//                    mList.add(index, item);
+//                    configureRecyclerView();
+//                });
+//                snackbar.show();
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
@@ -128,15 +146,15 @@ public class TaskList extends AppCompatActivity {
     }
 
     private void removeFromDatabase(Task item) {
-        dbQuery.deleteTask(item);
+        // todo delete task
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
         public final Context mContext;
-        List<Task> mList;
+        JSONArray mList;
         DateTime date;
 
-        public CustomAdapter(Context context, List<Task> list) {
+        public CustomAdapter(Context context, JSONArray list) {
             mContext = context;
             mList = list;
             date = new DateTime();
@@ -151,35 +169,42 @@ public class TaskList extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull CustomViewHolder holder, final int position) {
-            Task task = mList.get(position);
-            holder.Name.setText(task.getName());
-            holder.Description.setText(task.getDescription().length() == 0 ? "No description provided" : task.getDescription());
-            int isCompleted = task.getIsCompleted();
-            int isNotified = task.getIsNotified();
-            holder.Item.setOnClickListener(v -> {
-                selectedTask = task;
-                CurrentDateForEditor = DateTV.getText().toString();
-                startActivity(new Intent(getApplicationContext(), TaskEditor.class));
-                overridePendingTransition(0, 0);
-            });
-            String tt = task.getTime();
-            String[] tt_arr = tt.split(":");
-            int task_hour = Integer.parseInt(tt_arr[0]);
-            int task_min = Integer.parseInt(tt_arr[1]);
-            String task_med = tt_arr[2];
-            holder.Time.setText(tt_arr[0] + ":" + tt_arr[1] + " " + task_med);
-            holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
-            //check status of task
-            if (isCompleted == 1) {
-                holder.CompleteBtn.setVisibility(View.INVISIBLE);
-                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
-            } else
-                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
+            // todo manage adapter bind view
+            JSONObject task;
+            try {
+                task = mList.getJSONObject(position);
+                holder.Name.setText(task.getString("name"));
+//                holder.Description.setText(task.getDescription().length() == 0 ? "No description provided" : task.getDescription());
+//                int isCompleted = task.getIsCompleted();
+//                int isNotified = task.getIsNotified();
+//                holder.Item.setOnClickListener(v -> {
+//                    selectedTask = task;
+//                    CurrentDateForEditor = DateTV.getText().toString();
+//                    startActivity(new Intent(getApplicationContext(), TaskEditor.class));
+//                    overridePendingTransition(0, 0);
+//                });
+//                String tt = task.getTime();
+//                String[] tt_arr = tt.split(":");
+//                int task_hour = Integer.parseInt(tt_arr[0]);
+//                int task_min = Integer.parseInt(tt_arr[1]);
+//                String task_med = tt_arr[2];
+//                holder.Time.setText(tt_arr[0] + ":" + tt_arr[1] + " " + task_med);
+//                holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
+//                //check status of task
+//                if (isCompleted == 1) {
+//                    holder.CompleteBtn.setVisibility(View.INVISIBLE);
+//                    holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
+//                } else
+//                    holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
 
         @Override
         public int getItemCount() {
-            return mList.size();
+            return mList.length();
         }
 
         public class CustomViewHolder extends RecyclerView.ViewHolder {
@@ -204,7 +229,7 @@ public class TaskList extends AppCompatActivity {
 
     private void setComplete(Task task) {
         task.setIsCompleted(1);
-        dbQuery.upsertTask(task);
+        // todo set completed
         Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
         getTasks();
     }
