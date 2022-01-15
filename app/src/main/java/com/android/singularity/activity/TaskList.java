@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,20 +34,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class TaskList extends AppCompatActivity {
 
     private static final String TAG = "TaskList";
     RecyclerView mRecyclerView;
-    public CustomAdapter mAdapter;
     TextView DateTV, DayTV;
     static JSONObject selectedTask;
     LinearLayout NoResultsLayout;
-
-    // current date for editor
-    static String CurrentDateForEditor = "Select Date";
+    JSONArray mList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +57,8 @@ public class TaskList extends AppCompatActivity {
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
         setTouchCallback();
         //get today's date and update the view
-        CurrentDateForEditor = new DateTime().getDateForUser();
-        setDayDate(CurrentDateForEditor);
+        String date = new DateTime().getDateForUser();
+        setDayDate(date);
         getTasks();
         //add database change listener
         EventDispatcher.addEventListener(this::getTasks);
@@ -80,7 +75,6 @@ public class TaskList extends AppCompatActivity {
 
     private void openTaskAdder() {
         selectedTask = null;
-        CurrentDateForEditor = DateTV.getText().toString();
         startActivity(new Intent(getApplicationContext(), TaskEditor.class));
         overridePendingTransition(0, 0);
     }
@@ -90,12 +84,9 @@ public class TaskList extends AppCompatActivity {
         NoResultsLayout.setVisibility(View.INVISIBLE);
         CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), response -> {
             if (response == null) return;
-            if (response.equals(CalloutManager.TOKEN_INVALID)) {
-                getTasks();
-                return;
-            }
             try {
                 JSONArray jsonArray = new JSONArray(response);
+                mList = jsonArray;
                 TaskList.this.runOnUiThread(() -> {
                     if (jsonArray.length() != 0) {
                         setRecyclerViewAdapter(jsonArray);
@@ -107,8 +98,6 @@ public class TaskList extends AppCompatActivity {
                 e.printStackTrace();
             }
         });
-
-
     }
 
     void setTouchCallback() {
@@ -121,32 +110,57 @@ public class TaskList extends AppCompatActivity {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                //Remove swiped item
+                // Remove swiped item
                 // todo swiped
-//                int index = viewHolder.getLayoutPosition();
-//                Task item = mList.get(index);
-//                mList.remove(index);
-//                Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
-//                Handler handler = new Handler();
-//                Runnable runnable = () -> {
-//                    snackbar.dismiss();
-//                    removeFromDatabase(item);
-//                };
-//                handler.postDelayed(runnable, 2600);
-//                snackbar.setAction("UNDO", v -> {
-//                    handler.removeCallbacks(runnable);
-//                    mList.add(index, item);
-//                    configureRecyclerView();
-//                });
-//                snackbar.show();
+                int index = viewHolder.getLayoutPosition();
+                JSONObject item = null;
+                try {
+                    item = mList.getJSONObject(index);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                mList.remove(index);
+                setRecyclerViewAdapter(mList);
+                Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
+                Handler handler = new Handler();
+                JSONObject finalItem = item;
+                Runnable runnable = () -> {
+                    snackbar.dismiss();
+                    removeFromDatabase(finalItem);
+                };
+                handler.postDelayed(runnable, 2600);
+                snackbar.setAction("UNDO", v -> {
+                    handler.removeCallbacks(runnable);
+                    try {
+                        mList.put(index, finalItem);
+                        setRecyclerViewAdapter(mList);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+                snackbar.show();
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
     }
 
-    private void removeFromDatabase(Task item) {
+    private void removeFromDatabase(JSONObject item) {
         // todo delete task
+        JSONObject params = new JSONObject();
+        try {
+            params.put("id", item.getString("Id"));
+            params.put("action", "delete");
+            Log.e(TAG, "removeFromDatabase: " + params.toString() );
+            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, response -> {
+                if(response != null)
+                    getTasks();
+                else
+                    TaskList.this.runOnUiThread(() -> Toast.makeText(TaskList.this, "Something went wrong", Toast.LENGTH_SHORT).show());
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
@@ -173,29 +187,28 @@ public class TaskList extends AppCompatActivity {
             JSONObject task;
             try {
                 task = mList.getJSONObject(position);
-                holder.Name.setText(task.getString("name"));
-//                holder.Description.setText(task.getDescription().length() == 0 ? "No description provided" : task.getDescription());
-//                int isCompleted = task.getIsCompleted();
-//                int isNotified = task.getIsNotified();
-//                holder.Item.setOnClickListener(v -> {
-//                    selectedTask = task;
-//                    CurrentDateForEditor = DateTV.getText().toString();
-//                    startActivity(new Intent(getApplicationContext(), TaskEditor.class));
-//                    overridePendingTransition(0, 0);
-//                });
-//                String tt = task.getTime();
-//                String[] tt_arr = tt.split(":");
-//                int task_hour = Integer.parseInt(tt_arr[0]);
-//                int task_min = Integer.parseInt(tt_arr[1]);
-//                String task_med = tt_arr[2];
-//                holder.Time.setText(tt_arr[0] + ":" + tt_arr[1] + " " + task_med);
-//                holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
-//                //check status of task
-//                if (isCompleted == 1) {
-//                    holder.CompleteBtn.setVisibility(View.INVISIBLE);
-//                    holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
-//                } else
-//                    holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
+                holder.Name.setText(task.getString("Name"));
+                try {
+                    holder.Description.setText(task.getString("Description__c"));
+                } catch (JSONException e) {
+                    holder.Description.setText("No description provided");
+                }
+                holder.Item.setOnClickListener(v -> {
+                    selectedTask = task;
+                    startActivity(new Intent(getApplicationContext(), TaskEditor.class));
+                    overridePendingTransition(0, 0);
+                });
+                String tt = task.getString("Display_Date_Time__c");
+                String[] tt_arr = tt.split(" ");
+                tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2] + "\n     " + tt_arr[3];
+                holder.Time.setText(tt);
+                holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
+                //check status of task
+                if (task.getBoolean("Is_Completed__c")) {
+                    holder.CompleteBtn.setVisibility(View.INVISIBLE);
+                    holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
+                } else
+                    holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -227,10 +240,14 @@ public class TaskList extends AppCompatActivity {
 
     }
 
-    private void setComplete(Task task) {
-        task.setIsCompleted(1);
-        // todo set completed
-        Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
-        getTasks();
+    private void setComplete(JSONObject task) {
+        try {
+            task.put("Is_Completed__c", true);
+            // todo set completed
+//            Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
+//            getTasks();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

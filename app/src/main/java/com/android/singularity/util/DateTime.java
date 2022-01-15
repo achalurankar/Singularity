@@ -1,5 +1,7 @@
 package com.android.singularity.util;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.text.DateFormat;
@@ -7,8 +9,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DateTime {
+    private static final String TAG = "DateTime";
     //variables for date
     private int mDay, mMonth, mYear;
     //variables for time
@@ -59,24 +64,6 @@ public class DateTime {
         return day + "/" + month + "/" + this.mYear;
     }
 
-    //method related to current instance of time
-    public String getTimeForUser() {
-        String hour, minute, seconds;
-        if(this.mHour < 10)
-            hour = "0" + this.mHour;
-        else
-            hour = "" + this.mHour;
-        if(this.mMinute < 10)
-            minute = "0" + this.mMinute;
-        else
-            minute = "" + this.mMinute;
-        if(this.mSeconds < 10)
-            seconds = "0" + this.mSeconds;
-        else
-            seconds = "" + this.mSeconds;
-        return hour + ":" + minute + ":" + seconds;
-    }
-
     // static utility methods
     @NonNull public static String getDayOfWeek(@NonNull String date) {
         try {
@@ -92,63 +79,40 @@ public class DateTime {
         return "";
     }
 
-    @NonNull public static String getNextDate(@NonNull String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar c = Calendar.getInstance();
-        try {
-            c.setTime(sdf.parse(date));
-        } catch (ParseException e){
-            System.out.println(e.getMessage());
-        }
-        c.add(Calendar.DATE, 1);  // number of days to add
-        date = sdf.format(c.getTime());  // dt is now the new date
-        return date;
-    }
-
-    @NonNull public static String getPreviousDate(@NonNull String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar c = Calendar.getInstance();
-        try {
-            c.setTime(sdf.parse(date));
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-        }
-        c.add(Calendar.DATE, -1);  // number of days to remove
-        date = sdf.format(c.getTime());  // dt is now the new date
-        return date;
-    }
-
-    //method to gate date time format value for database
-    public static String getDateTimeValue(String date, String timeValue) {
-        String[] dateArr = date.split("/");
-        String[] timeArr = timeValue.split(":");
-        int hour = Integer.parseInt(timeArr[0]);
-        int min = Integer.parseInt(timeArr[1]);
-        if(timeArr[2].equals("PM")) {
-            if(hour != 12)
-                hour += 12;
-        }
-        else{
-            if(hour == 12)
-                hour = 0;
-        }
-        String minStr = "", hourStr = "";
-        if(min < 10)
-            minStr = "0" + min;
-        else
-            minStr = min + "";
-        if(hour < 10)
-            hourStr = "0" + hour;
-        else
-            hourStr = hour + "";
-        //required
-        //2020-07-01T05:10:00
-        //YYYY-MM-DDTHH:MM:SS
-        return dateArr[2] + "-" + // YYYY
-                dateArr[1] + "-" + // MM
-                dateArr[0] + "T" + // DD
-                hourStr + ":" + // HH
-                minStr + ":00"; //MM:SS
+    public static String getGMTDateTime(String date, String time) {
+        String gmtString = "";
+        // converting ist to gmt for salesforce -
+        // required format 2022-01-15T14:30:00.000Z
+        // from 2/1/2022 date and time 20:41
+        String[] dateSplit = date.split("/");
+        String[] timeSplit = time.split(":");
+        int year = Integer.parseInt(dateSplit[2]);
+        int month = Integer.parseInt(dateSplit[1]);
+        int day = Integer.parseInt(dateSplit[0]);
+        int hour = Integer.parseInt(timeSplit[0]);
+        int min = Integer.parseInt(timeSplit[1]);
+        // current format is in IST, convert to GMT which is 5:30 hrs behind IST
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year,month,day,hour,min,0);
+        // remove 5hrs and 30 mins from IST
+        calendar.add(Calendar.HOUR_OF_DAY, -5);
+        calendar.add(Calendar.MINUTE, -30);
+        //get gmt date time
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH);
+        if(month == 0)
+            month = 12;
+        day = calendar.get(Calendar.DATE);
+        hour = calendar.get(Calendar.HOUR_OF_DAY);
+        min = calendar.get(Calendar.MINUTE);
+        gmtString = year + "-"
+                + (String.valueOf(month).length() == 1 ? "0" + month : month) + "-"
+                + (String.valueOf(day).length() == 1 ? "0" + day : day) + "T"
+                + (String.valueOf(hour).length() == 1 ? "0" + hour : hour) + ":"
+                + (String.valueOf(min).length() == 1 ? "0" + min : min)
+                + ":00.000Z";
+        Log.e(TAG, "getGMTDateTime: " + calendar.getTimeInMillis());
+        return gmtString;
     }
 
     //getters and setters

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -12,18 +13,20 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.singularity.R;
+import com.android.singularity.util.Constants;
+import com.android.singularity.util.DateTime;
 import com.android.singularity.util.EventDispatcher;
-import com.android.singularity.modal.Task;
+import com.andromeda.callouts.CalloutManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class TaskEditor extends AppCompatActivity {
 
+    private static final String TAG = "TaskEditor";
     EditText TaskName, Description;
     RelativeLayout CalendarBtn, SaveBtn, ClockBtn;
-    TextView Date, TimeTextView;
-    String TimeValue = "";
+    TextView DateTextView, TimeTextView;
     JSONObject mTask;
 
     @Override
@@ -35,7 +38,7 @@ public class TaskEditor extends AppCompatActivity {
         Description = findViewById(R.id.description);
         CalendarBtn = findViewById(R.id.date_btn);
         ClockBtn = findViewById(R.id.time_btn);
-        Date = findViewById(R.id.date_tv);
+        DateTextView = findViewById(R.id.date_tv);
         TimeTextView = findViewById(R.id.time_tv);
         SaveBtn = findViewById(R.id.save_btn);
         //attaching listeners
@@ -47,13 +50,17 @@ public class TaskEditor extends AppCompatActivity {
         if (mTask != null) {
             setupForm();
         } else
-            Date.setText(TaskList.CurrentDateForEditor);
+            DateTextView.setText(new DateTime().getDateForUser());
     }
 
     private void setupForm() {
         // todo setup form
-//        TaskName.setText(mTask.getName());
-//        Description.setText(mTask.getDescription());
+        try {
+            TaskName.setText(mTask.getString("Name"));
+            Description.setText(mTask.getString("Description__c"));
+        } catch (JSONException ignored) {
+
+        }
 //        Date.setText(mTask.getDate());
 //        TimeTextView.setText(mTask.getTime());
 //        TimeValue = mTask.getTime();
@@ -61,19 +68,17 @@ public class TaskEditor extends AppCompatActivity {
 
     private void updateTask() {
         String name = TaskName.getText().toString().trim();
-        String date = Date.getText().toString();
+        String date = DateTextView.getText().toString();
+        String time = TimeTextView.getText().toString();
         String description = Description.getText().toString().trim();
-        String taskId = null;
+        String taskId = "";
         if (mTask != null) {
             try {
-                taskId = mTask.getString("id");
+                taskId = mTask.getString("Id");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-        int isNotified = 0;
-        int isCompleted = 0;
-
         //validation
         if (name.length() == 0) {
             Toast.makeText(getApplicationContext(), "Enter Name!", Toast.LENGTH_SHORT).show();
@@ -83,16 +88,34 @@ public class TaskEditor extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Date not selected!", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (TimeValue.contains("time")) {
-            Toast.makeText(this, "Time not selected!", Toast.LENGTH_SHORT).show();
+        if (time.toLowerCase().contains("time")) {
+            Toast.makeText(getApplicationContext(), "Time not selected!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         //todo upsert task
-        //call event change listener invoker
-        EventDispatcher.callOnDataChange();
-        //close current activity
-        finish();
+        String gmtDateTimeValue = DateTime.getGMTDateTime(date, time);
+        JSONObject requestStructure = new JSONObject();
+        JSONObject params = new JSONObject();
+        try {
+            requestStructure.put("id", taskId);
+            requestStructure.put("name", name);
+            requestStructure.put("taskTime", gmtDateTimeValue);
+            requestStructure.put("isCompleted", false);
+            requestStructure.put("action", "upsert");
+            params.put("requestStructure", requestStructure.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, response -> {
+            if(response != null) {
+                //call event change listener invoker
+                EventDispatcher.callOnDataChange();
+                //close current activity
+                TaskEditor.this.finish();
+            }
+        });
+
     }
 
     private void popupCalendar() {
@@ -104,17 +127,8 @@ public class TaskEditor extends AppCompatActivity {
             int month = datePicker.getMonth() + 1;
             int day = datePicker.getDayOfMonth();
             int year = datePicker.getYear();
-            String dayStr, monStr;
-            if (day / 10 == 0)
-                dayStr = "0" + day;
-            else
-                dayStr = String.valueOf(day);
-            if (month / 10 == 0)
-                monStr = "0" + month;
-            else
-                monStr = String.valueOf(month);
-            String date = dayStr + "/" + monStr + "/" + year;
-            Date.setText(date);
+            String date = day + "/" + month + "/" + year;
+            DateTextView.setText(date);
             dialog.dismiss();
         });
         dialog.show();
@@ -128,34 +142,7 @@ public class TaskEditor extends AppCompatActivity {
         ConfirmBtn.setOnClickListener(v -> {
             int hours = timePicker.getHour();
             int minutes = timePicker.getMinute();
-            String meridiem = "";
-            //converting to 12hr format for user perspective
-            if (hours > 12) {
-                hours -= 12;
-                meridiem = "PM";
-            } else {
-                if (hours == 0) {
-                    hours = 12;
-                    meridiem = "AM";
-                } else {
-                    if (hours == 12)
-                        meridiem = "PM";
-                    else
-                        meridiem = "AM";
-                }
-            }
-            //prepending zero if needed
-            String minStr = "", hourStr = "";
-            if (minutes < 10)
-                minStr = "0" + minutes;
-            else
-                minStr = minutes + "";
-            if (hours < 10)
-                hourStr = "0" + hours;
-            else
-                hourStr = hours + "";
-            TimeValue = hourStr + ":" + minStr + ":" + meridiem;
-            TimeTextView.setText(TimeValue);
+            TimeTextView.setText(hours + ":" + minutes);
             dialog.dismiss();
         });
         dialog.show();

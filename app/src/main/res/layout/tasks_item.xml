@@ -81,7 +81,7 @@
             android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="09:30 am"
+            android:text="15 Jan 2022\n    09:30 am"
             android:textColor="@color/label"
             android:textSize="14sp" />
     </LinearLayout>
