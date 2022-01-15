@@ -15,4 +15,8 @@ public class EventDispatcher {
             eventListener.onChange();
         }
     }
+
+    public interface EventListener {
+        void onChange();
+    }
 }
