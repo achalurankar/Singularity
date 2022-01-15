@@ -1,5 +1,18 @@
 package com.android.singularity.activity;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -7,36 +20,17 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Dialog;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.DatePicker;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.android.singularity.R;
+import com.android.singularity.modal.Task;
+import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
-import com.android.singularity.util.DateTime;
-import com.android.singularity.modal.Task;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskList extends AppCompatActivity implements View.OnClickListener {
+public class TaskList extends AppCompatActivity {
 
     private static final String TAG = "TaskList";
     RecyclerView mRecyclerView;
@@ -47,7 +41,7 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
     LinearLayout NoResultsLayout;
     DbQuery dbQuery;
 
-    //current date for editor
+    // current date for editor
     static String CurrentDateForEditor = "Select Date";
 
     @Override
@@ -60,15 +54,13 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         NoResultsLayout = findViewById(R.id.no_result_layout);
         configureRecyclerView();
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
-        findViewById(R.id.calendar).setOnClickListener(v -> popupCalendar());
         setTouchCallback();
         //get today's date and update the view
-        String currentDate = new DateTime().getDateForUser();
-        setDayDate(currentDate);
-        getTasks(currentDate);
-        setupLeftRightDrags();
+        CurrentDateForEditor = new DateTime().getDateForUser();
+        setDayDate(CurrentDateForEditor);
+        getTasks();
         //add database change listener
-        EventDispatcher.addEventListener(() -> getTasks(DateTV.getText().toString()));
+        EventDispatcher.addEventListener(this::getTasks);
     }
 
     private void configureRecyclerView() {
@@ -76,14 +68,6 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, mList));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
-    }
-
-    private void setupLeftRightDrags() {
-        ImageView left, right;
-        left = findViewById(R.id.drag_left_btn);
-        right = findViewById(R.id.drag_right_btn);
-        left.setOnClickListener(this);
-        right.setOnClickListener(this);
     }
 
     private void setDayDate(String date) {
@@ -98,21 +82,9 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         overridePendingTransition(0, 0);
     }
 
-    @Override
-    public void onClick(View v) {
-        String newDate = "";
-        if(v.getId() == R.id.drag_left_btn){
-            newDate = DateTime.getPreviousDate(DateTV.getText().toString());
-        } else if(v.getId() == R.id.drag_right_btn){
-            newDate = DateTime.getNextDate(DateTV.getText().toString());
-        }
-        setDayDate(newDate);
-        getTasks(newDate);
-    }
-
-    void getTasks(String inputDate) {
+    void getTasks() {
         NoResultsLayout.setVisibility(View.INVISIBLE);
-        mList = dbQuery.getTasks(inputDate);
+        mList = dbQuery.getTasks();
         if (mList.size() != 0) {
             mAdapter = new CustomAdapter(TaskList.this, mList);
             mRecyclerView.setAdapter(mAdapter);
@@ -157,34 +129,6 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
 
     private void removeFromDatabase(Task item) {
         dbQuery.deleteTask(item);
-    }
-
-    //to get date for query
-    void popupCalendar() {
-        Dialog dialog = new Dialog(TaskList.this);
-        dialog.setContentView(R.layout.calendar_pop_up);
-        TextView ConfirmBtn = dialog.findViewById(R.id.confirm_button);
-        DatePicker datePicker = dialog.findViewById(R.id.calendar);
-        ConfirmBtn.setOnClickListener(v -> {
-            int month = datePicker.getMonth() + 1;
-            int day = datePicker.getDayOfMonth();
-            int year = datePicker.getYear();
-            String dayStr, monStr;
-            if (day / 10 == 0)
-                dayStr = "0" + day;
-            else
-                dayStr = String.valueOf(day);
-            if (month / 10 == 0)
-                monStr = "0" + month;
-            else
-                monStr = String.valueOf(month);
-            String date = dayStr + "/" + monStr + "/" + year;
-            DateTV.setText(date);
-            DayTV.setText(DateTime.getDayOfWeek(date));
-            getTasks(date);
-            dialog.dismiss();
-        });
-        dialog.show();
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
@@ -262,6 +206,6 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         task.setIsCompleted(1);
         dbQuery.upsertTask(task);
         Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
-        getTasks(task.getDate());
+        getTasks();
     }
 }
