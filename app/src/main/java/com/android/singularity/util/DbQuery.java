@@ -97,8 +97,8 @@ public class DbQuery {
         rows.put("task_date", task.getDate());
         rows.put("task_time", task.getTime());
         rows.put("description", task.getDescription());
-        rows.put("is_notified", task.isNotified());
-        rows.put("is_completed", task.isCompleted());
+        rows.put("is_notified", task.getIsNotified());
+        rows.put("is_completed", task.getIsCompleted());
         String dateTimeValue = DateTime.getDateTimeValue(task.getDate(), task.getTime());
         rows.put("date_time", dateTimeValue);
 
