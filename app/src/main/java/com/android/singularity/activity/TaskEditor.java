@@ -3,9 +3,11 @@ package com.android.singularity.activity;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -73,7 +75,7 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     private void updateTask() {
-        setLoading(true);
+        hideKeyboard();
         String name = TaskName.getText().toString().trim();
         String date = DateTextView.getText().toString();
         String time = TimeTextView.getText().toString();
@@ -99,7 +101,7 @@ public class TaskEditor extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Time not selected!", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        setLoading(true);
         String gmtDateTimeValue = DateTime.getGMTDateTime(date, time);
         JSONObject requestStructure = new JSONObject();
         JSONObject params = new JSONObject();
@@ -114,16 +116,33 @@ public class TaskEditor extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, response -> {
-            if(response != null) {
+        CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
+            @Override
+            public void onSuccess(String s) {
                 setLoading(false);
                 //call event change listener invoker
                 EventDispatcher.callOnDataChange();
                 //close current activity
                 TaskEditor.this.finish();
             }
+
+            @Override
+            public void onError(String error) {
+                TaskEditor.this.runOnUiThread(() -> {
+                    setLoading(false);
+                    String message = "Something went wrong!";
+                    if(error.contains("will never fire"))
+                        message = "Task time cannot be in past";
+                    Toast.makeText(TaskEditor.this, message, Toast.LENGTH_SHORT).show();
+                });
+            }
         });
 
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mContainer.getWindowToken(), 0);
     }
 
     private void popupCalendar() {
@@ -142,17 +161,6 @@ public class TaskEditor extends AppCompatActivity {
         dialog.show();
     }
 
-    public void setLoading(boolean loading) {
-        View view = findViewById(R.id.loader);
-        if(loading) {
-            view.setVisibility(View.VISIBLE);
-            view.setAlpha(1);
-            mContainer.setAlpha(0.4f);
-        } else {
-            view.setVisibility(View.INVISIBLE);
-            mContainer.setAlpha(1);
-        }
-    }
     private void popupClock() {
         Dialog dialog = new Dialog(TaskEditor.this);
         dialog.setContentView(R.layout.clock_pop_up);
@@ -165,6 +173,18 @@ public class TaskEditor extends AppCompatActivity {
             dialog.dismiss();
         });
         dialog.show();
+    }
+
+    public void setLoading(boolean loading) {
+        View view = findViewById(R.id.loader);
+        if(loading) {
+            view.setVisibility(View.VISIBLE);
+            view.setAlpha(1);
+            mContainer.setAlpha(0.4f);
+        } else {
+            view.setVisibility(View.INVISIBLE);
+            mContainer.setAlpha(1);
+        }
     }
 
     @Override

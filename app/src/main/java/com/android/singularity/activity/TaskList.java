@@ -29,7 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class TaskList extends AppCompatActivity implements ListAdapter.OnItemClickListener{
+public class TaskList extends AppCompatActivity implements ListAdapter.OnItemClickListener {
 
     private static final String TAG = "TaskList";
     RecyclerView mRecyclerView;
@@ -90,22 +90,29 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
         setLoading(true);
         NoResultsLayout.setVisibility(View.INVISIBLE);
         findViewById(R.id.loader).setVisibility(View.VISIBLE);
-        CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), response -> {
-            if (response == null) return;
-            try {
-                JSONArray jsonArray = new JSONArray(response);
-                mList = jsonArray;
-                TaskList.this.runOnUiThread(() -> {
-                    setLoading(false);
-                    if (jsonArray.length() != 0) {
-                        setRecyclerViewAdapter(jsonArray);
-                    } else {
-                        NoResultsLayout.setVisibility(View.VISIBLE);
-                        setRecyclerViewAdapter(new JSONArray());
-                    }
-                });
-            } catch (JSONException e) {
-                e.printStackTrace();
+        CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), new CalloutManager.ResponseListener() {
+            @Override
+            public void onSuccess(String response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+                    mList = jsonArray;
+                    TaskList.this.runOnUiThread(() -> {
+                        setLoading(false);
+                        if (jsonArray.length() != 0) {
+                            setRecyclerViewAdapter(jsonArray);
+                        } else {
+                            NoResultsLayout.setVisibility(View.VISIBLE);
+                            setRecyclerViewAdapter(new JSONArray());
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(TaskList.this, error, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -152,11 +159,16 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
             requestStructure.put("id", item.getString("Id"));
             requestStructure.put("action", "delete");
             params.put("requestStructure", requestStructure.toString());
-            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, response -> {
-                if(response != null)
+            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
+                @Override
+                public void onSuccess(String response) {
                     getTasks();
-                else
-                    TaskList.this.runOnUiThread(() -> Toast.makeText(TaskList.this, "Something went wrong", Toast.LENGTH_SHORT).show());
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(TaskList.this, error, Toast.LENGTH_SHORT).show();
+                }
             });
         } catch (JSONException e) {
             e.printStackTrace();
@@ -165,7 +177,7 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
 
     public void setLoading(boolean loading) {
         View view = findViewById(R.id.loader);
-        if(loading) {
+        if (loading) {
             view.setVisibility(View.VISIBLE);
             view.setAlpha(1);
             mContainer.setAlpha(0.4f);

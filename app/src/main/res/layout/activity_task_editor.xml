@@ -77,7 +77,6 @@
                 android:textColor="@color/task_adder_value"
                 android:paddingTop="5dp"
                 android:textSize="15sp"
-                android:maxLength="5"
                 android:paddingRight="10dp"
                 android:paddingBottom="5dp" />
 
@@ -172,6 +171,7 @@
                 android:textColor="@color/task_adder_value"
                 android:paddingTop="5dp"
                 android:textSize="15sp"
+                android:maxLength="255"
                 android:fontFamily="@font/bubblegum_sans"
                 android:paddingRight="10dp"
                 android:paddingBottom="5dp" />
