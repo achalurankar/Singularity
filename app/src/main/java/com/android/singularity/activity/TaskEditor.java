@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -31,12 +32,14 @@ public class TaskEditor extends AppCompatActivity {
     RelativeLayout CalendarBtn, SaveBtn, ClockBtn;
     TextView DateTextView, TimeTextView;
     JSONObject mTask;
+    RelativeLayout mContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_editor);
         //initialize variables
+        mContainer = findViewById(R.id.container);
         TaskName = findViewById(R.id.task_name_et);
         Description = findViewById(R.id.description);
         CalendarBtn = findViewById(R.id.date_btn);
@@ -70,6 +73,7 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     private void updateTask() {
+        setLoading(true);
         String name = TaskName.getText().toString().trim();
         String date = DateTextView.getText().toString();
         String time = TimeTextView.getText().toString();
@@ -112,6 +116,7 @@ public class TaskEditor extends AppCompatActivity {
         }
         CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, response -> {
             if(response != null) {
+                setLoading(false);
                 //call event change listener invoker
                 EventDispatcher.callOnDataChange();
                 //close current activity
@@ -137,6 +142,17 @@ public class TaskEditor extends AppCompatActivity {
         dialog.show();
     }
 
+    public void setLoading(boolean loading) {
+        View view = findViewById(R.id.loader);
+        if(loading) {
+            view.setVisibility(View.VISIBLE);
+            view.setAlpha(1);
+            mContainer.setAlpha(0.4f);
+        } else {
+            view.setVisibility(View.INVISIBLE);
+            mContainer.setAlpha(1);
+        }
+    }
     private void popupClock() {
         Dialog dialog = new Dialog(TaskEditor.this);
         dialog.setContentView(R.layout.clock_pop_up);

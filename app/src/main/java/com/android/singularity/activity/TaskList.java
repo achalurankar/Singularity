@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
     ListAdapter mAdapter;
     LinearLayout NoResultsLayout;
     JSONArray mList;
+    RelativeLayout mContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
         setContentView(R.layout.activity_task_list);
         Session.storeAccessToken(Constants.ACCESS_TOKEN_ENDPOINT);
         DateTV = findViewById(R.id.date);
+        mContainer = findViewById(R.id.container);
         DayTV = findViewById(R.id.day);
         NoResultsLayout = findViewById(R.id.no_result_layout);
         mRecyclerView = findViewById(R.id.recycler_view);
@@ -84,16 +87,20 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
     }
 
     void getTasks() {
+        setLoading(true);
         NoResultsLayout.setVisibility(View.INVISIBLE);
+        findViewById(R.id.loader).setVisibility(View.VISIBLE);
         CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), response -> {
             if (response == null) return;
             try {
                 JSONArray jsonArray = new JSONArray(response);
                 mList = jsonArray;
                 TaskList.this.runOnUiThread(() -> {
+                    setLoading(false);
                     if (jsonArray.length() != 0) {
                         setRecyclerViewAdapter(jsonArray);
                     } else {
+                        NoResultsLayout.setVisibility(View.VISIBLE);
                         setRecyclerViewAdapter(new JSONArray());
                     }
                 });
@@ -156,6 +163,17 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
         }
     }
 
+    public void setLoading(boolean loading) {
+        View view = findViewById(R.id.loader);
+        if(loading) {
+            view.setVisibility(View.VISIBLE);
+            view.setAlpha(1);
+            mContainer.setAlpha(0.4f);
+        } else {
+            view.setVisibility(View.INVISIBLE);
+            mContainer.setAlpha(1);
+        }
+    }
 
     private void setComplete(JSONObject task) {
         try {

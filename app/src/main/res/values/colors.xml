@@ -19,6 +19,7 @@
     <color name="neon_red">#F61717</color>
     <color name="orange">#FE9148</color>
     <color name="dark_orange">#FD5429</color>
+    <color name="bright_orange">#FFA500</color>
     <color name="light_pink">#F8A9D2</color>
     <color name="form_bg_et">#F9F8FB</color>
 </resources>
