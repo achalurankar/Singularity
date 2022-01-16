@@ -21,6 +21,9 @@ import com.andromeda.callouts.CalloutManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TaskEditor extends AppCompatActivity {
 
     private static final String TAG = "TaskEditor";
@@ -54,16 +57,16 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     private void setupForm() {
-        // todo setup form
+        Map<String, String> datetime = new HashMap<>();
         try {
+            datetime = DateTime.getDateTimeForEditorForm(mTask.getString("Display_Date_Time__c"));
             TaskName.setText(mTask.getString("Name"));
             Description.setText(mTask.getString("Description__c"));
         } catch (JSONException ignored) {
 
         }
-//        Date.setText(mTask.getDate());
-//        TimeTextView.setText(mTask.getTime());
-//        TimeValue = mTask.getTime();
+        DateTextView.setText(datetime.get("date"));
+        TimeTextView.setText(datetime.get("time"));
     }
 
     private void updateTask() {
@@ -93,7 +96,6 @@ public class TaskEditor extends AppCompatActivity {
             return;
         }
 
-        //todo upsert task
         String gmtDateTimeValue = DateTime.getGMTDateTime(date, time);
         JSONObject requestStructure = new JSONObject();
         JSONObject params = new JSONObject();
@@ -102,6 +104,7 @@ public class TaskEditor extends AppCompatActivity {
             requestStructure.put("name", name);
             requestStructure.put("taskTime", gmtDateTimeValue);
             requestStructure.put("isCompleted", false);
+            requestStructure.put("description", description);
             requestStructure.put("action", "upsert");
             params.put("requestStructure", requestStructure.toString());
         } catch (JSONException e) {

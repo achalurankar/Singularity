@@ -115,6 +115,24 @@ public class DateTime {
         return gmtString;
     }
 
+    public static Map<String, String> getDateTimeForEditorForm(String displayDateTime) {
+        Map<String, String> datetime = new HashMap<>();
+        String[] dtTT = displayDateTime.split(" ");
+        String date = dtTT[0] + "/" + nameVsNumberMap.get(dtTT[1]) + "/" + dtTT[2];
+        String time = dtTT[3];
+        datetime.put("date", date);
+        datetime.put("time", time);
+        return datetime;
+    }
+
+    public static Map<String, Integer> nameVsNumberMap = new HashMap<>();
+
+    static {
+        String[] monthList = new String[]{ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" };
+        for (int i = 0; i < 12; i++) {
+            nameVsNumberMap.put(monthList[i], i + 1);
+        }
+    }
     //getters and setters
     public int getDay() {
         return mDay;
