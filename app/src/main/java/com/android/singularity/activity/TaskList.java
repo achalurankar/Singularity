@@ -39,7 +39,6 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
     ListAdapter mAdapter;
     LinearLayout NoResultsLayout;
     JSONArray mList;
-    RelativeLayout mContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +46,6 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
         setContentView(R.layout.activity_task_list);
         Session.storeAccessToken(Constants.ACCESS_TOKEN_ENDPOINT);
         DateTV = findViewById(R.id.date);
-        mContainer = findViewById(R.id.container);
         DayTV = findViewById(R.id.day);
         NoResultsLayout = findViewById(R.id.no_result_layout);
         mRecyclerView = findViewById(R.id.recycler_view);

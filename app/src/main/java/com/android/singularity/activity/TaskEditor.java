@@ -35,14 +35,12 @@ public class TaskEditor extends AppCompatActivity {
     RelativeLayout CalendarBtn, SaveBtn, ClockBtn;
     TextView DateTextView, TimeTextView;
     JSONObject mTask;
-    RelativeLayout mContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_editor);
         //initialize variables
-        mContainer = findViewById(R.id.container);
         TaskName = findViewById(R.id.task_name_et);
         Description = findViewById(R.id.description);
         CalendarBtn = findViewById(R.id.date_btn);
@@ -145,7 +143,7 @@ public class TaskEditor extends AppCompatActivity {
 
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mContainer.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(findViewById(R.id.container).getWindowToken(), 0);
     }
 
     private void popupCalendar() {
