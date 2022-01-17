@@ -19,6 +19,7 @@ import com.android.singularity.R;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.EventDispatcher;
+import com.android.singularity.util.Loader;
 import com.andromeda.callouts.CalloutManager;
 
 import org.json.JSONException;
@@ -101,7 +102,7 @@ public class TaskEditor extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Time not selected!", Toast.LENGTH_SHORT).show();
             return;
         }
-        setLoading(true);
+        Loader.toggleLoading(TaskEditor.this, R.id.loader, R.id.container);
         String gmtDateTimeValue = DateTime.getGMTDateTime(date, time);
         JSONObject requestStructure = new JSONObject();
         JSONObject params = new JSONObject();
@@ -119,17 +120,19 @@ public class TaskEditor extends AppCompatActivity {
         CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
             @Override
             public void onSuccess(String s) {
-                setLoading(false);
-                //call event change listener invoker
-                EventDispatcher.callOnDataChange();
-                //close current activity
-                TaskEditor.this.finish();
+                TaskEditor.this.runOnUiThread(() -> {
+                    Loader.toggleLoading(TaskEditor.this, R.id.loader, R.id.container);
+                    //call event change listener invoker
+                    EventDispatcher.callOnDataChange();
+                    //close current activity
+                    TaskEditor.this.finish();
+                });
             }
 
             @Override
             public void onError(String error) {
                 TaskEditor.this.runOnUiThread(() -> {
-                    setLoading(false);
+                    Loader.toggleLoading(TaskEditor.this, R.id.loader, R.id.container);
                     String message = "Something went wrong!";
                     if(error.contains("will never fire"))
                         message = "Task time cannot be in past";
@@ -173,18 +176,6 @@ public class TaskEditor extends AppCompatActivity {
             dialog.dismiss();
         });
         dialog.show();
-    }
-
-    public void setLoading(boolean loading) {
-        View view = findViewById(R.id.loader);
-        if(loading) {
-            view.setVisibility(View.VISIBLE);
-            view.setAlpha(1);
-            mContainer.setAlpha(0.4f);
-        } else {
-            view.setVisibility(View.INVISIBLE);
-            mContainer.setAlpha(1);
-        }
     }
 
     @Override

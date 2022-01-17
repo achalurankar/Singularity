@@ -21,6 +21,7 @@ import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.util.ListAdapter;
+import com.android.singularity.util.Loader;
 import com.andromeda.callouts.CalloutManager;
 import com.andromeda.callouts.Session;
 import com.google.android.material.snackbar.Snackbar;
@@ -87,7 +88,7 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
     }
 
     void getTasks() {
-        setLoading(true);
+        Loader.toggleLoading(this, R.id.loader, R.id.container);
         NoResultsLayout.setVisibility(View.INVISIBLE);
         findViewById(R.id.loader).setVisibility(View.VISIBLE);
         CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), new CalloutManager.ResponseListener() {
@@ -97,7 +98,7 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
                     JSONArray jsonArray = new JSONArray(response);
                     mList = jsonArray;
                     TaskList.this.runOnUiThread(() -> {
-                        setLoading(false);
+                        Loader.toggleLoading(TaskList.this, R.id.loader, R.id.container);
                         if (jsonArray.length() != 0) {
                             setRecyclerViewAdapter(jsonArray);
                         } else {
@@ -162,28 +163,16 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
             CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
                 @Override
                 public void onSuccess(String response) {
-                    getTasks();
+                    TaskList.this.runOnUiThread(() -> getTasks());
                 }
 
                 @Override
                 public void onError(String error) {
-                    Toast.makeText(TaskList.this, error, Toast.LENGTH_SHORT).show();
+                    TaskList.this.runOnUiThread(() -> Toast.makeText(TaskList.this, error, Toast.LENGTH_SHORT).show());
                 }
             });
         } catch (JSONException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void setLoading(boolean loading) {
-        View view = findViewById(R.id.loader);
-        if (loading) {
-            view.setVisibility(View.VISIBLE);
-            view.setAlpha(1);
-            mContainer.setAlpha(0.4f);
-        } else {
-            view.setVisibility(View.INVISIBLE);
-            mContainer.setAlpha(1);
         }
     }
 
