@@ -161,17 +161,8 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
             requestStructure.put("id", item.getString("Id"));
             requestStructure.put("action", "delete");
             params.put("requestStructure", requestStructure.toString());
-            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
-                @Override
-                public void onSuccess(String response) {
-                    TaskList.this.runOnUiThread(() -> getTasks());
-                }
-
-                @Override
-                public void onError(String error) {
-                    TaskList.this.runOnUiThread(() -> Toast.makeText(TaskList.this, error, Toast.LENGTH_SHORT).show());
-                }
-            });
+            // no need to call get tasks as element is already removed from the view. hence no response listener required
+            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params);
         } catch (JSONException e) {
             e.printStackTrace();
         }
