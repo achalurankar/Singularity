@@ -92,26 +92,29 @@ public class TaskList extends AppCompatActivity implements ListAdapter.OnItemCli
         CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), new CalloutManager.ResponseListener() {
             @Override
             public void onSuccess(String response) {
-                try {
-                    JSONArray jsonArray = new JSONArray(response);
-                    mList = jsonArray;
-                    TaskList.this.runOnUiThread(() -> {
-                        Loader.toggleLoading(TaskList.this, R.id.loader, R.id.container);
+                TaskList.this.runOnUiThread(() -> {
+                    Loader.toggleLoading(TaskList.this, R.id.loader, R.id.container);
+                    try {
+                        JSONArray jsonArray = new JSONArray(response);
+                        mList = jsonArray;
                         if (jsonArray.length() != 0) {
                             setRecyclerViewAdapter(jsonArray);
                         } else {
                             NoResultsLayout.setVisibility(View.VISIBLE);
                             setRecyclerViewAdapter(new JSONArray());
                         }
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
 
             @Override
             public void onError(String error) {
-                Toast.makeText(TaskList.this, error, Toast.LENGTH_SHORT).show();
+                TaskList.this.runOnUiThread(() -> {
+                    Loader.toggleLoading(TaskList.this, R.id.loader, R.id.container);
+                    Toast.makeText(TaskList.this, error, Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }
