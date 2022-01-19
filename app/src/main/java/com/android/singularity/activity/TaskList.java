@@ -1,12 +1,9 @@
 package com.android.singularity.activity;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.widget.DatePicker;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
+import com.android.singularity.adapter.TaskAdapter;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
@@ -31,15 +29,12 @@ public class TaskList extends AppCompatActivity {
 
     private static final String TAG = "TaskList";
     RecyclerView mRecyclerView;
-    public CustomAdapter mAdapter;
+    public TaskAdapter mAdapter;
     List<Task> mList = new ArrayList<>();
     TextView DateTV, DayTV;
-    static Task selectedTask;
+    public static Task selectedTask;
     LinearLayout NoResultsLayout;
     DbQuery dbQuery;
-
-    //current date for editor
-    static String CurrentDateForEditor = "Select Date";
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -53,7 +48,7 @@ public class TaskList extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
-        mAdapter = new CustomAdapter(this, TaskList.this, mList);
+        mAdapter = new TaskAdapter(this, TaskList.this, mList);
         mRecyclerView.setAdapter(mAdapter);
         //action btn
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
@@ -73,7 +68,6 @@ public class TaskList extends AppCompatActivity {
 
     private void openTaskAdder() {
         selectedTask = null;
-        CurrentDateForEditor = DateTV.getText().toString();
         startActivity(new Intent(getApplicationContext(), TaskEditor.class));
         overridePendingTransition(0, 0);
     }
@@ -82,7 +76,7 @@ public class TaskList extends AppCompatActivity {
         NoResultsLayout.setVisibility(View.INVISIBLE);
         mList = dbQuery.getTasks();
         if (mList.size() != 0) {
-            mAdapter = new CustomAdapter(this, TaskList.this, mList);
+            mAdapter = new TaskAdapter(this, TaskList.this, mList);
             mRecyclerView.setAdapter(mAdapter);
         } else {
             NoResultsLayout.setVisibility(View.VISIBLE);

@@ -1,12 +1,15 @@
 package com.android.singularity.util;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DateTime {
     //variables for date
@@ -17,6 +20,46 @@ public class DateTime {
     //constructor
     public DateTime() {
         getCurrentDate();
+    }
+
+    public static String getDisplayDate(String date) {
+        //DD/MM/YYYY to DDth MMM YYYY
+        String formatted = "";
+        String[] arr = date.split("/");
+        int day = Integer.parseInt(arr[0]);
+        int month = Integer.parseInt(arr[1]);
+        formatted = "" + day;
+        if(day != 11 && day != 12 && day != 13) {
+            switch (arr[0].charAt(1)) {
+                case '1' :
+                    formatted += "st ";
+                    break;
+                case '2' :
+                    formatted += "nd ";
+                    break;
+                case '3' :
+                    formatted += "rd ";
+                    break;
+                default:
+                    formatted += "th ";
+            }
+        } else {
+            formatted += "th ";
+        }
+        formatted += numberVsNameMap.get(month);
+        formatted += " " + arr[2];
+        return formatted;
+    }
+
+    public static Map<Integer, String> numberVsNameMap = new HashMap<>();
+
+    private static final String TAG = "DateTime";
+
+    static {
+        String[] monthList = new String[]{ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" };
+        for (int i = 0; i < 12; i++) {
+            numberVsNameMap.put( i + 1, monthList[i]);
+        }
     }
 
     //constructor function
@@ -59,24 +102,6 @@ public class DateTime {
         return day + "/" + month + "/" + this.mYear;
     }
 
-    //method related to current instance of time
-    public String getTimeForUser() {
-        String hour, minute, seconds;
-        if(this.mHour < 10)
-            hour = "0" + this.mHour;
-        else
-            hour = "" + this.mHour;
-        if(this.mMinute < 10)
-            minute = "0" + this.mMinute;
-        else
-            minute = "" + this.mMinute;
-        if(this.mSeconds < 10)
-            seconds = "0" + this.mSeconds;
-        else
-            seconds = "" + this.mSeconds;
-        return hour + ":" + minute + ":" + seconds;
-    }
-
     // static utility methods
     @NonNull public static String getDayOfWeek(@NonNull String date) {
         try {
@@ -90,32 +115,6 @@ public class DateTime {
             System.out.println("Unparseable using " + e.getMessage());
         }
         return "";
-    }
-
-    @NonNull public static String getNextDate(@NonNull String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar c = Calendar.getInstance();
-        try {
-            c.setTime(sdf.parse(date));
-        } catch (ParseException e){
-            System.out.println(e.getMessage());
-        }
-        c.add(Calendar.DATE, 1);  // number of days to add
-        date = sdf.format(c.getTime());  // dt is now the new date
-        return date;
-    }
-
-    @NonNull public static String getPreviousDate(@NonNull String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar c = Calendar.getInstance();
-        try {
-            c.setTime(sdf.parse(date));
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-        }
-        c.add(Calendar.DATE, -1);  // number of days to remove
-        date = sdf.format(c.getTime());  // dt is now the new date
-        return date;
     }
 
     //method to gate date time format value for database

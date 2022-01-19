@@ -1,10 +1,6 @@
 package com.android.singularity.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Dialog;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -13,19 +9,21 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.singularity.R;
+import com.android.singularity.modal.Task;
 import com.android.singularity.service.Scheduler;
+import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
-import com.android.singularity.modal.Task;
-import com.android.singularity.util.DateTime;
 
 public class TaskEditor extends AppCompatActivity {
 
     EditText TaskName, Description;
     RelativeLayout CalendarBtn, SaveBtn, ClockBtn;
     TextView Date, TimeTextView;
-    String TimeValue = "";
+    String TimeValue = "Select time";
     Task mTask;
 
     @Override
@@ -49,7 +47,7 @@ public class TaskEditor extends AppCompatActivity {
         if (mTask != null) {
             setupForm();
         } else
-            Date.setText(TaskList.CurrentDateForEditor);
+            Date.setText(new DateTime().getDateForUser());
     }
 
     private void setupForm() {

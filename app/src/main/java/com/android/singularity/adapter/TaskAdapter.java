@@ -1,4 +1,4 @@
-package com.android.singularity.activity;
+package com.android.singularity.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,22 +14,22 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
+import com.android.singularity.activity.TaskEditor;
+import com.android.singularity.activity.TaskList;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.DateTime;
 
 import java.util.List;
 
-public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
+public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHolder> {
     private final TaskList taskList;
     public final Context mContext;
     List<Task> list;
-    DateTime date;
 
-    public CustomAdapter(TaskList taskList, Context context, List<Task> list) {
+    public TaskAdapter(TaskList taskList, Context context, List<Task> list) {
         this.taskList = taskList;
         mContext = context;
         this.list = list;
-        date = new DateTime();
     }
 
     public Task get(int index) {
@@ -63,16 +63,16 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
         int isNotified = task.getIsNotified();
         holder.Item.setOnClickListener(v -> {
             TaskList.selectedTask = task;
-            TaskList.CurrentDateForEditor = taskList.DateTV.getText().toString();
             taskList.startActivity(new Intent(taskList.getApplicationContext(), TaskEditor.class));
             taskList.overridePendingTransition(0, 0);
         });
         String tt = task.getTime();
         String[] tt_arr = tt.split(":");
-        int task_hour = Integer.parseInt(tt_arr[0]);
-        int task_min = Integer.parseInt(tt_arr[1]);
         String task_med = tt_arr[2];
-        holder.Time.setText(tt_arr[0] + ":" + tt_arr[1] + " " + task_med);
+        String time = tt_arr[0] + ":" + tt_arr[1] + " " + task_med; // time
+        String date = DateTime.getDisplayDate(task.getDate()); // date
+        holder.Time.setText(time);
+        holder.Date.setText(date);
         holder.CompleteBtn.setOnClickListener(v -> taskList.setComplete(task));
         //check status of task
         if (isCompleted == 1) {
@@ -90,7 +90,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
     public class CustomViewHolder extends RecyclerView.ViewHolder {
 
         View TaskStatus;
-        TextView Name, Description, Time;
+        TextView Name, Description, Time, Date;
         RelativeLayout Item;
         ImageView CompleteBtn;
 
@@ -102,6 +102,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
             Name = itemView.findViewById(R.id.name);
             Description = itemView.findViewById(R.id.description);
             Time = itemView.findViewById(R.id.time);
+            Date = itemView.findViewById(R.id.date);
         }
     }
 
