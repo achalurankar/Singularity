@@ -27,7 +27,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskList extends AppCompatActivity implements View.OnClickListener {
+public class TaskList extends AppCompatActivity {
 
     private static final String TAG = "TaskList";
     RecyclerView mRecyclerView;
@@ -57,23 +57,13 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         mRecyclerView.setAdapter(mAdapter);
         //action btn
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
-        findViewById(R.id.calendar).setOnClickListener(v -> popupCalendar());
         setTouchCallback();
         //get today's date and update the view
         String currentDate = new DateTime().getDateForUser();
         setDayDate(currentDate);
-        getTasks(currentDate);
-        setupLeftRightDrags();
+        getTasks();
         //add database change listener
-        EventDispatcher.addEventListener(() -> getTasks(DateTV.getText().toString()));
-    }
-
-    private void setupLeftRightDrags() {
-        ImageView left, right;
-        left = findViewById(R.id.drag_left_btn);
-        right = findViewById(R.id.drag_right_btn);
-        left.setOnClickListener(this);
-        right.setOnClickListener(this);
+        EventDispatcher.addEventListener(this::getTasks);
     }
 
     private void setDayDate(String date) {
@@ -88,21 +78,9 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         overridePendingTransition(0, 0);
     }
 
-    @Override
-    public void onClick(View v) {
-        String newDate = "";
-        if(v.getId() == R.id.drag_left_btn){
-            newDate = DateTime.getPreviousDate(DateTV.getText().toString());
-        } else if(v.getId() == R.id.drag_right_btn){
-            newDate = DateTime.getNextDate(DateTV.getText().toString());
-        }
-        setDayDate(newDate);
-        getTasks(newDate);
-    }
-
-    void getTasks(String inputDate) {
+    void getTasks() {
         NoResultsLayout.setVisibility(View.INVISIBLE);
-        mList = dbQuery.getTasks(inputDate);
+        mList = dbQuery.getTasks();
         if (mList.size() != 0) {
             mAdapter = new CustomAdapter(this, TaskList.this, mList);
             mRecyclerView.setAdapter(mAdapter);
@@ -147,38 +125,10 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         dbQuery.deleteTask(item);
     }
 
-    //to get date for query
-    void popupCalendar() {
-        Dialog dialog = new Dialog(TaskList.this);
-        dialog.setContentView(R.layout.calendar_pop_up);
-        TextView ConfirmBtn = dialog.findViewById(R.id.confirm_button);
-        DatePicker datePicker = dialog.findViewById(R.id.calendar);
-        ConfirmBtn.setOnClickListener(v -> {
-            int month = datePicker.getMonth() + 1;
-            int day = datePicker.getDayOfMonth();
-            int year = datePicker.getYear();
-            String dayStr, monStr;
-            if (day / 10 == 0)
-                dayStr = "0" + day;
-            else
-                dayStr = String.valueOf(day);
-            if (month / 10 == 0)
-                monStr = "0" + month;
-            else
-                monStr = String.valueOf(month);
-            String date = dayStr + "/" + monStr + "/" + year;
-            DateTV.setText(date);
-            DayTV.setText(DateTime.getDayOfWeek(date));
-            getTasks(date);
-            dialog.dismiss();
-        });
-        dialog.show();
-    }
-
     public void setComplete(Task task) {
         task.setIsCompleted(1);
         dbQuery.upsertTask(task);
         Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
-        getTasks(task.getDate());
+        getTasks();
     }
 }
