@@ -1,23 +1,18 @@
 package com.android.singularity.activity;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,10 +46,13 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_list);
         dbQuery = new DbQuery(this);
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
         DateTV = findViewById(R.id.date);
         DayTV = findViewById(R.id.day);
         NoResultsLayout = findViewById(R.id.no_result_layout);
-        configureRecyclerView();
+        configureAdapter();
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
         findViewById(R.id.calendar).setOnClickListener(v -> popupCalendar());
         setTouchCallback();
@@ -67,11 +65,9 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         EventDispatcher.addEventListener(() -> getTasks(DateTV.getText().toString()));
     }
 
-    private void configureRecyclerView() {
-        mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setAdapter(new CustomAdapter(TaskList.this, mList));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
+    private void configureAdapter() {
+        mAdapter = new CustomAdapter(this, TaskList.this, mList);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void setupLeftRightDrags() {
@@ -110,7 +106,7 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         NoResultsLayout.setVisibility(View.INVISIBLE);
         mList = dbQuery.getTasks(inputDate);
         if (mList.size() != 0) {
-            mAdapter = new CustomAdapter(TaskList.this, mList);
+            mAdapter = new CustomAdapter(this, TaskList.this, mList);
             mRecyclerView.setAdapter(mAdapter);
         } else {
             NoResultsLayout.setVisibility(View.VISIBLE);
@@ -131,7 +127,7 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
                 //Remove swiped item
                 int index = viewHolder.getLayoutPosition();
                 Task item = mList.get(index);
-                mList.remove(index);
+                mAdapter.remove(index);
                 Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
                 Handler handler = new Handler();
                 Runnable runnable = () -> {
@@ -141,8 +137,8 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
                 handler.postDelayed(runnable, 2600);
                 snackbar.setAction("UNDO", v -> {
                     handler.removeCallbacks(runnable);
-                    mList.add(index, item);
-                    configureRecyclerView();
+                    mAdapter.add(index, item);
+                    configureAdapter();
                 });
                 snackbar.show();
             }
@@ -183,78 +179,7 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         dialog.show();
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
-        public final Context mContext;
-        List<Task> mList;
-        DateTime date;
-
-        public CustomAdapter(Context context, List<Task> list) {
-            mContext = context;
-            mList = list;
-            date = new DateTime();
-        }
-
-        @NonNull
-        @Override
-        public CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(mContext).inflate(R.layout.tasks_item, parent, false);
-            return new CustomViewHolder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull CustomViewHolder holder, final int position) {
-            Task task = mList.get(position);
-            holder.Name.setText(task.getName());
-            holder.Description.setText(task.getDescription().length() == 0 ? "No description provided" : task.getDescription());
-            int isCompleted = task.getIsCompleted();
-            int isNotified = task.getIsNotified();
-            holder.Item.setOnClickListener(v -> {
-                selectedTask = task;
-                CurrentDateForEditor = DateTV.getText().toString();
-                startActivity(new Intent(getApplicationContext(), TaskEditor.class));
-                overridePendingTransition(0, 0);
-            });
-            String tt = task.getTime();
-            String[] tt_arr = tt.split(":");
-            int task_hour = Integer.parseInt(tt_arr[0]);
-            int task_min = Integer.parseInt(tt_arr[1]);
-            String task_med = tt_arr[2];
-            holder.Time.setText(tt_arr[0] + ":" + tt_arr[1] + " " + task_med);
-            holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
-            //check status of task
-            if (isCompleted == 1) {
-                holder.CompleteBtn.setVisibility(View.INVISIBLE);
-                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
-            } else
-                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
-        }
-
-        @Override
-        public int getItemCount() {
-            return mList.size();
-        }
-
-        public class CustomViewHolder extends RecyclerView.ViewHolder {
-
-            View TaskStatus;
-            TextView Name, Description, Time;
-            RelativeLayout Item;
-            ImageView CompleteBtn;
-
-            public CustomViewHolder(@NonNull View itemView) {
-                super(itemView);
-                Item = itemView.findViewById(R.id.item);
-                CompleteBtn = itemView.findViewById(R.id.complete_btn);
-                TaskStatus = itemView.findViewById(R.id.task_status);
-                Name = itemView.findViewById(R.id.name);
-                Description = itemView.findViewById(R.id.description);
-                Time = itemView.findViewById(R.id.time);
-            }
-        }
-
-    }
-
-    private void setComplete(Task task) {
+    public void setComplete(Task task) {
         task.setIsCompleted(1);
         dbQuery.upsertTask(task);
         Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
