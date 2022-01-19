@@ -43,7 +43,7 @@ public class DbQuery {
 
     // get tasks for a input date
     public List<Task> getTasks() {
-        Cursor cursor = ref.rawQuery("SELECT * from tasks WHERE task_date = ? ORDER BY is_completed, date_time;", null);
+        Cursor cursor = ref.rawQuery("SELECT * from tasks ORDER BY is_completed, date_time;", null);
         cursor.moveToFirst();
         List<Task> tasks = new ArrayList<>();
         if (cursor.getCount() != 0) {
