@@ -40,27 +40,26 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     public void generateNotification(Task task, Context context) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.app_icon_vector_for_notification)
-                .setContentTitle(task.getName())
-                .setContentText(task.getDescription().length() == 0 ? "No Description Provided" : task.getDescription())
-                .setAutoCancel(true);
+                .setSmallIcon(R.drawable.app_icon_vector)
+                .setContentTitle(task.getName());
+        if (task.getDescription().length() < 35) {
+            if(task.getDescription().length() == 0) {
+                builder.setContentText("No description provided");
+            } else {
+                builder.setContentText(task.getDescription());
+            }
+        } else {
+            builder.setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(task.getDescription()));
+        }
         Notification notification = builder.build();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId(CHANNEL_ID);
-        }
-
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "NotificationDemo",
-                    IMPORTANCE_DEFAULT
-            );
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        notificationManager.notify(0, notification);
+        NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID,
+                "SingularityChannel",
+                IMPORTANCE_DEFAULT
+        );
+        notificationManager.createNotificationChannel(channel);
+        notificationManager.notify(task.getId(), notification);
     }
 }
