@@ -1,14 +1,15 @@
 package com.android.singularity.modal;
 
 public class Task {
-    String id, name, date, time, description;
+    int id;
+    String name, date, time, description;
     int isNotified, isCompleted;
 
     public Task() {
 
     }
 
-    public Task(String id, String name, String date, String time, String description, int isNotified, int isCompleted) {
+    public Task(int id, String name, String date, String time, String description, int isNotified, int isCompleted) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -18,11 +19,11 @@ public class Task {
         this.isCompleted = isCompleted;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

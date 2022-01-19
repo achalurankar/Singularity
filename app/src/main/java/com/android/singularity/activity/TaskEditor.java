@@ -64,7 +64,7 @@ public class TaskEditor extends AppCompatActivity {
         String name = TaskName.getText().toString().trim();
         String date = Date.getText().toString();
         String description = Description.getText().toString().trim();
-        String taskId = null;
+        int taskId = 0;
         if (mTask != null)
             taskId = mTask.getId();
         int isNotified = 0;
@@ -87,7 +87,7 @@ public class TaskEditor extends AppCompatActivity {
         //upsert task
         Task task = new Task(taskId, name, date, TimeValue, description, isNotified, isCompleted);
         DbQuery dbQuery = new DbQuery(this);
-        dbQuery.upsertTask(task);
+        task.setId(dbQuery.upsertTask(task));
         if (mTask == null) {
             Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
         } else {

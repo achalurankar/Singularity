@@ -16,8 +16,13 @@ public class DbQuery {
 
     public DbQuery(Context context) {
         this.context = context;
+        // dropDatabase(); // for development, when changing schema.
         createOrOpenDatabase();
         createTasksTableIfNotExists();
+    }
+
+    private void dropDatabase() {
+        context.deleteDatabase("singularity");
     }
 
     public void createOrOpenDatabase() {
@@ -26,7 +31,7 @@ public class DbQuery {
 
     public void createTasksTableIfNotExists() {
         ref.execSQL("CREATE TABLE IF NOT EXISTS tasks(" +
-                "task_id VARCHAR, " +
+                "task_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "task_name VARCHAR, " +
                 "task_date VARCHAR, " +
                 "task_time VARCHAR, " +
@@ -43,10 +48,11 @@ public class DbQuery {
         cursor.moveToFirst();
         List<Task> tasks = new ArrayList<>();
         if (cursor.getCount() != 0) {
-            String id, name, desc, date, time;
+            int id;
+            String name, desc, date, time;
             int isNotified, isCompleted;
             for (int i = 0; i < cursor.getCount(); i++) {
-                id = cursor.getString(0);
+                id = cursor.getInt(0);
                 name = cursor.getString(1);
                 date = cursor.getString(2);
                 time = cursor.getString(3);
@@ -70,9 +76,10 @@ public class DbQuery {
         cursor.moveToFirst();
         if(cursor.getCount() == 0)  return null;
 
-        String id, name, desc, date, time;
+        int id;
+        String name, desc, date, time;
         int isNotified, isCompleted;
-        id = cursor.getString(0);
+        id = cursor.getInt(0);
         name = cursor.getString(1);
         date = cursor.getString(2);
         time = cursor.getString(3);
@@ -82,18 +89,13 @@ public class DbQuery {
         return new Task(id, name, date, time, desc, isNotified, isCompleted);
     }
 
-    public static final int UPDATE = 0;
-    public static final int INSERT = 1;
-
     public int upsertTask(Task task) {
         //setting row values
-        boolean isUpdate = true;
-        if(task.getId() == null) {
-            task.setId(System.currentTimeMillis() + "");
-            isUpdate = false;
-        }
+        boolean isUpdate = false;
         ContentValues rows = new ContentValues();
-        rows.put("task_id", task.getId());
+        if(task.getId() != 0) {
+            isUpdate = true;
+        }
         rows.put("task_name", task.getName());
         rows.put("task_date", task.getDate());
         rows.put("task_time", task.getTime());
@@ -104,17 +106,17 @@ public class DbQuery {
         rows.put("date_time", dateTimeValue);
 
         if(isUpdate) {
-            String[] args = new String[]{task.getId()};
+            String[] args = new String[]{String.valueOf(task.getId())};
             ref.update("tasks", rows, "task_id = ?", args);
-            return UPDATE;
+            return task.getId();
         } else {
-            ref.insert("tasks", null, rows);
-            return INSERT;
+            long newId = ref.insert("tasks", null, rows);
+            return (int) newId;
         }
     }
 
     public void deleteTask(Task task) {
-        String[] args = new String[]{task.getId()};
+        String[] args = new String[]{String.valueOf(task.getId())};
         ref.delete("tasks", "task_id = ?", args);
     }
 }
