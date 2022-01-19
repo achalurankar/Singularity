@@ -46,13 +46,16 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_list);
         dbQuery = new DbQuery(this);
-        mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
         DateTV = findViewById(R.id.date);
         DayTV = findViewById(R.id.day);
         NoResultsLayout = findViewById(R.id.no_result_layout);
-        configureAdapter();
+        // recycler view
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(TaskList.this));
+        mAdapter = new CustomAdapter(this, TaskList.this, mList);
+        mRecyclerView.setAdapter(mAdapter);
+        //action btn
         findViewById(R.id.add_task_btn).setOnClickListener(v -> openTaskAdder());
         findViewById(R.id.calendar).setOnClickListener(v -> popupCalendar());
         setTouchCallback();
@@ -63,11 +66,6 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
         setupLeftRightDrags();
         //add database change listener
         EventDispatcher.addEventListener(() -> getTasks(DateTV.getText().toString()));
-    }
-
-    private void configureAdapter() {
-        mAdapter = new CustomAdapter(this, TaskList.this, mList);
-        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void setupLeftRightDrags() {
@@ -126,19 +124,17 @@ public class TaskList extends AppCompatActivity implements View.OnClickListener 
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 //Remove swiped item
                 int index = viewHolder.getLayoutPosition();
-                Task item = mList.get(index);
+                Task item = mAdapter.get(index);
                 mAdapter.remove(index);
                 Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
                 Handler handler = new Handler();
                 Runnable runnable = () -> {
-                    snackbar.dismiss();
                     removeFromDatabase(item);
                 };
                 handler.postDelayed(runnable, 2600);
                 snackbar.setAction("UNDO", v -> {
                     handler.removeCallbacks(runnable);
                     mAdapter.add(index, item);
-                    configureAdapter();
                 });
                 snackbar.show();
             }

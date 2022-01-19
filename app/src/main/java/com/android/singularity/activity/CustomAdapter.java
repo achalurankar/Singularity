@@ -32,19 +32,10 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
         date = new DateTime();
     }
 
-    public interface OnItemClickListener {
-        void onClick(Task task);
-    }
-
-    private OnItemClickListener listener;
-
     public Task get(int index) {
         return list.get(index);
     }
 
-    public void addOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
-    }
 
     public void remove(int index) {
         list.remove(index);
