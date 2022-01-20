@@ -16,7 +16,7 @@ public class DbQuery {
 
     public DbQuery(Context context) {
         this.context = context;
-        // dropDatabase(); // for development, when changing schema.
+//        dropDatabase(); // for development, when changing schema.
         createOrOpenDatabase();
         createTasksTableIfNotExists();
     }
@@ -33,21 +33,23 @@ public class DbQuery {
         ref.execSQL("CREATE TABLE IF NOT EXISTS tasks(" +
                 "task_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "task_name VARCHAR, " +
-                "task_date VARCHAR, " +
-                "task_time VARCHAR, " +
+                "task_date VARCHAR DEFAULT 'note', " +
+                "task_time VARCHAR DEFAULT 'note', " +
                 "description VARCHAR, " +
-                "is_notified int, " +
-                "is_completed int, " +
-                "date_time DATETIME);");
+                "is_notified int DEFAULT 0, " +
+                "is_completed int DEFAULT 0, " +
+                "task_type int, " +
+                "date_time DATETIME DEFAULT (datetime('now','localtime')));");
     }
 
     // get tasks for a input date
-    public List<Task> getTasks() {
-        Cursor cursor = ref.rawQuery("SELECT * from tasks ORDER BY is_completed, date_time;", null);
+    public List<Task> getTasks(int type) {
+        String[] args = new String[] { String.valueOf(type) };
+        Cursor cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY is_completed, date_time;", args);
         cursor.moveToFirst();
         List<Task> tasks = new ArrayList<>();
         if (cursor.getCount() != 0) {
-            int id;
+            int id, taskType;
             String name, desc, date, time;
             int isNotified, isCompleted;
             for (int i = 0; i < cursor.getCount(); i++) {
@@ -58,7 +60,8 @@ public class DbQuery {
                 desc = cursor.getString(4);
                 isNotified = cursor.getInt(5);
                 isCompleted = cursor.getInt(6);
-                Task task = new Task(id, name, date, time, desc, isNotified, isCompleted);
+                taskType = cursor.getInt(7);
+                Task task = new Task(taskType, id, name, date, time, desc, isNotified, isCompleted);
                 tasks.add(task);
                 cursor.moveToNext();
             }
@@ -75,7 +78,7 @@ public class DbQuery {
         cursor.moveToFirst();
         if(cursor.getCount() == 0)  return null;
 
-        int id;
+        int id, taskType;
         String name, desc, date, time;
         int isNotified, isCompleted;
         id = cursor.getInt(0);
@@ -85,7 +88,8 @@ public class DbQuery {
         desc = cursor.getString(4);
         isNotified = cursor.getInt(5);
         isCompleted = cursor.getInt(6);
-        return new Task(id, name, date, time, desc, isNotified, isCompleted);
+        taskType = cursor.getInt(7);
+        return new Task(taskType, id, name, date, time, desc, isNotified, isCompleted);
     }
 
     public int upsertTask(Task task) {
@@ -96,13 +100,16 @@ public class DbQuery {
             isUpdate = true;
         }
         rows.put("task_name", task.getName());
-        rows.put("task_date", task.getDate());
-        rows.put("task_time", task.getTime());
         rows.put("description", task.getDescription());
-        rows.put("is_notified", task.getIsNotified());
-        rows.put("is_completed", task.getIsCompleted());
-        String dateTimeValue = DateTime.getDateTimeValue(task.getDate(), task.getTime());
-        rows.put("date_time", dateTimeValue);
+        rows.put("task_type", task.getTaskType());
+        if(task.getTaskType() == Constants.TYPE_ALERT) {
+            rows.put("task_date", task.getDate());
+            rows.put("task_time", task.getTime());
+            rows.put("is_notified", task.getIsNotified());
+            rows.put("is_completed", task.getIsCompleted());
+            String dateTimeValue = DateTime.getDateTimeValue(task.getDate(), task.getTime());
+            rows.put("date_time", dateTimeValue);
+        }
 
         if(isUpdate) {
             String[] args = new String[]{String.valueOf(task.getId())};

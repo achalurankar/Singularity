@@ -1,14 +1,6 @@
 package com.android.singularity.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,10 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.singularity.R;
-import com.android.singularity.activity.TaskEditor;
-import com.android.singularity.activity.TaskList;
 import com.android.singularity.adapter.TaskAdapter;
+import com.android.singularity.main.ParentActivity;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
@@ -28,23 +25,24 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TasksFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TasksFragment extends Fragment {
 
     private static final String TAG = "TasksFragment";
-
-    public static Task selectedTask;
+    private int FragmentType;
+    // view variables
+    RecyclerView mRecyclerView;
+    public TaskAdapter mAdapter;
+    List<Task> mList = new ArrayList<>();
+    LinearLayout NoResultsLayout;
+    // db handler
+    DbQuery dbQuery;
 
     public TasksFragment() {
         // Required empty public constructor
     }
 
-    public static TasksFragment newInstance() {
-        return new TasksFragment();
+    public TasksFragment(int type) {
+        FragmentType = type;
     }
 
     @Override
@@ -52,13 +50,6 @@ public class TasksFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
     }
-
-    // view variables
-    RecyclerView mRecyclerView;
-    public TaskAdapter mAdapter;
-    List<Task> mList = new ArrayList<>();
-    LinearLayout NoResultsLayout;
-    DbQuery dbQuery;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,8 +62,6 @@ public class TasksFragment extends Fragment {
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mAdapter = new TaskAdapter(getActivity(), mList);
-        mRecyclerView.setAdapter(mAdapter);
         setSwipeCallback();
         getTasks();
         //add database change listener
@@ -82,7 +71,8 @@ public class TasksFragment extends Fragment {
 
     public void getTasks() {
         NoResultsLayout.setVisibility(View.INVISIBLE);
-        mList = dbQuery.getTasks();
+        mList = dbQuery.getTasks(FragmentType);
+        Log.e(TAG, "getTasks: type - " + FragmentType + " size = " + mList.size());
         if (mList.size() == 0) {
             NoResultsLayout.setVisibility(View.VISIBLE);
         }
@@ -90,16 +80,7 @@ public class TasksFragment extends Fragment {
     }
 
     public void configureAdapter() {
-        mAdapter = new TaskAdapter(getActivity(), mList);
-        mAdapter.addOnItemClickListener(clickedItem -> {
-            selectedTask = clickedItem;
-            if(getActivity() != null) {
-                getActivity().startActivity(new Intent(getActivity(), TaskEditor.class));
-                getActivity().overridePendingTransition(0, 0);
-            } else {
-                Log.e(TAG, "configureAdapter: null activity", new Exception("null fragment activity"));
-            }
-        });
+        mAdapter = new TaskAdapter(getActivity(), mList, FragmentType);
         mRecyclerView.setAdapter(mAdapter);
     }
 

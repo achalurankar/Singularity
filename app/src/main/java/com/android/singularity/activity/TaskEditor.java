@@ -2,6 +2,7 @@ package com.android.singularity.activity;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -13,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.singularity.R;
 import com.android.singularity.fragment.TasksFragment;
+import com.android.singularity.main.ParentActivity;
 import com.android.singularity.modal.Task;
 import com.android.singularity.service.Scheduler;
+import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
@@ -26,6 +29,7 @@ public class TaskEditor extends AppCompatActivity {
     TextView Date, TimeTextView;
     String TimeValue = "Select time";
     Task mTask;
+    int taskType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +48,15 @@ public class TaskEditor extends AppCompatActivity {
         ClockBtn.setOnClickListener(v -> popupClock());
         SaveBtn.setOnClickListener(v -> updateTask());
         findViewById(R.id.back).setOnClickListener(v -> finish());
-        mTask = TasksFragment.selectedTask;
+        mTask = ParentActivity.selectedTask;
+        taskType = getIntent().getIntExtra("type", 0);
+        if(taskType == Constants.TYPE_NOTE) {
+            CalendarBtn.setVisibility(View.GONE);
+            ClockBtn.setVisibility(View.GONE);
+            findViewById(R.id.time_label).setVisibility(View.GONE);
+            findViewById(R.id.date_label).setVisibility(View.GONE);
+            ((TextView) findViewById(R.id.header_label)).setText("Add new note");
+        }
         if (mTask != null) {
             setupForm();
         } else
@@ -61,7 +73,6 @@ public class TaskEditor extends AppCompatActivity {
 
     private void updateTask() {
         String name = TaskName.getText().toString().trim();
-        String date = Date.getText().toString();
         String description = Description.getText().toString().trim();
         int taskId = 0;
         if (mTask != null)
@@ -74,17 +85,21 @@ public class TaskEditor extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Enter Name!", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (date.toLowerCase().contains("date")) {
-            Toast.makeText(getApplicationContext(), "Date not selected!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TimeValue.contains("time")) {
-            Toast.makeText(this, "Time not selected!", Toast.LENGTH_SHORT).show();
-            return;
+        String date = "";
+        if(taskType == Constants.TYPE_ALERT) {
+            date = Date.getText().toString();
+            if (date.toLowerCase().contains("date")) {
+                Toast.makeText(getApplicationContext(), "Date not selected!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (TimeValue.contains("time")) {
+                Toast.makeText(this, "Time not selected!", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         //upsert task
-        Task task = new Task(taskId, name, date, TimeValue, description, isNotified, isCompleted);
+        Task task = new Task(taskType, taskId, name, date, TimeValue, description, isNotified, isCompleted);
         DbQuery dbQuery = new DbQuery(this);
         task.setId(dbQuery.upsertTask(task));
         if (mTask == null) {
@@ -92,8 +107,11 @@ public class TaskEditor extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
         }
-        // schedule task in future
-        Scheduler.schedule(task, this);
+
+        if(taskType == Constants.TYPE_ALERT) {
+            // schedule task in future
+            Scheduler.schedule(task, this);
+        }
         //call event change listener invoker
         EventDispatcher.callOnDataChange();
         //close current activity

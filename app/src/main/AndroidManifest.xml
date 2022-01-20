@@ -14,7 +14,6 @@
         <activity
             android:name=".main.ParentActivity"
             android:exported="false" />
-        <activity android:name=".activity.TaskList" />
         <activity android:name=".activity.TaskEditor" />
         <activity android:name=".activity.Groups" />
         <activity android:name=".activity.Splash">

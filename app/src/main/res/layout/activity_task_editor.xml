@@ -29,6 +29,7 @@
 
             <!--Header-->
             <TextView
+                android:id="@+id/header_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -66,6 +67,7 @@
                 android:paddingBottom="5dp" />
 
             <TextView
+                android:id="@+id/date_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -102,6 +104,7 @@
             </RelativeLayout>
 
             <TextView
+                android:id="@+id/time_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
