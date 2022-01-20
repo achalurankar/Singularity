@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -67,8 +68,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         });
 
         if(fragmentType == Constants.TYPE_NOTE) {
-            holder.Date.setVisibility(View.GONE);
-            holder.Time.setVisibility(View.GONE);
+            holder.TimeLayout.setVisibility(View.GONE);
             holder.CompleteBtn.setVisibility(View.GONE);
             holder.TaskStatus.setVisibility(View.GONE);
             return;
@@ -99,12 +99,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         View TaskStatus;
         TextView Name, Description, Time, Date;
         RelativeLayout Item;
+        LinearLayout TimeLayout;
         ImageView CompleteBtn;
 
         public CustomViewHolder(@NonNull View itemView) {
             super(itemView);
             Item = itemView.findViewById(R.id.item);
             CompleteBtn = itemView.findViewById(R.id.complete_btn);
+            TimeLayout = itemView.findViewById(R.id.time_layout);
             TaskStatus = itemView.findViewById(R.id.task_status);
             Name = itemView.findViewById(R.id.name);
             Description = itemView.findViewById(R.id.description);
