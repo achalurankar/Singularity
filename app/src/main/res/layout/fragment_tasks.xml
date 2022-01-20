@@ -30,6 +30,7 @@
             android:src="@drawable/no_fish"/>
 
         <TextView
+            android:id="@+id/no_result_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="No tasks added"
