@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
@@ -22,12 +23,26 @@ import com.android.singularity.util.DateTime;
 import java.util.List;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHolder> {
-    private final TaskList taskList;
-    public final Context mContext;
+    private TaskList taskList = null;
+    public FragmentActivity mContext;
     List<Task> list;
 
-    public TaskAdapter(TaskList taskList, Context context, List<Task> list) {
+    public interface OnItemClickListener {
+        void onClick(Task clickedItem);
+    }
+
+    private OnItemClickListener listener;
+
+    public void addOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
+    public TaskAdapter(TaskList taskList, FragmentActivity context, List<Task> list) {
         this.taskList = taskList;
+        mContext = context;
+        this.list = list;
+    }
+    public TaskAdapter(FragmentActivity context, List<Task> list) {
         mContext = context;
         this.list = list;
     }
@@ -62,9 +77,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         int isCompleted = task.getIsCompleted();
         int isNotified = task.getIsNotified();
         holder.Item.setOnClickListener(v -> {
-            TaskList.selectedTask = task;
-            taskList.startActivity(new Intent(taskList.getApplicationContext(), TaskEditor.class));
-            taskList.overridePendingTransition(0, 0);
+            if(listener != null) {
+                listener.onClick(task);
+            }
         });
         String tt = task.getTime();
         String[] tt_arr = tt.split(":");

@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.singularity.R;
+import com.android.singularity.fragment.TasksFragment;
 import com.android.singularity.modal.Task;
 import com.android.singularity.service.Scheduler;
 import com.android.singularity.util.DateTime;
@@ -43,7 +44,7 @@ public class TaskEditor extends AppCompatActivity {
         ClockBtn.setOnClickListener(v -> popupClock());
         SaveBtn.setOnClickListener(v -> updateTask());
         findViewById(R.id.back).setOnClickListener(v -> finish());
-        mTask = TaskList.selectedTask;
+        mTask = TasksFragment.selectedTask;
         if (mTask != null) {
             setupForm();
         } else

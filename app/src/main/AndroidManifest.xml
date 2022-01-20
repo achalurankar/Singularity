@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.singularity">
 
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -11,7 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Singularity.Dark">
-        <activity android:name=".activity.TaskList"/>
+        <activity
+            android:name=".main.ParentActivity"
+            android:exported="false" />
+        <activity android:name=".activity.TaskList" />
         <activity android:name=".activity.TaskEditor" />
         <activity android:name=".activity.Groups" />
         <activity android:name=".activity.Splash">
@@ -22,8 +25,7 @@
             </intent-filter>
         </activity>
 
-
-        <receiver android:name=".service.NotificationReceiver"/>
+        <receiver android:name=".service.NotificationReceiver" />
 
         <meta-data
             android:name="preloaded_fonts"
