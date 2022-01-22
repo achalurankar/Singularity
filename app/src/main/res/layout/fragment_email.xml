@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragment.EmailFragment">
+
+    <com.agrawalsuneet.dotsloader.loaders.AllianceLoader
+        android:id="@+id/loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:alliance_animDuration="400"
+        app:alliance_distanceMultiplier="4"
+        app:alliance_dotsRadius="15dp"
+        android:visibility="invisible"
+        android:layout_gravity="center"
+        app:alliance_drawOnlyStroke="true"
+        app:alliance_firstDotsColor="@color/bright_orange"
+        app:alliance_secondDotsColor="@color/bright_orange"
+        app:alliance_strokeWidth="4dp"
+        app:alliance_thirdDotsColor="@color/bright_orange" />
+
+    <RelativeLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            android:overScrollMode="never"/>
+
+        <LinearLayout
+            android:id="@+id/no_result_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            android:orientation="vertical"
+            android:background="#000"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:src="@drawable/no_fish"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No tasks added"
+                android:textColor="@color/light_pink"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>

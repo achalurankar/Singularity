@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,12 +53,60 @@ public class DateTime {
     }
 
     public static Map<Integer, String> numberVsNameMap = new HashMap<>();
+    public static Map<String, Integer> nameVsNumberMap = new HashMap<>();
 
     private static final String TAG = "DateTime";
+
+    public static String getGMTDateTime(String date, String time) {
+        String gmtString = "";
+        // converting ist to gmt for salesforce -
+        // required format 2022-01-15T14:30:00.000Z
+        // from 2/1/2022 date and time 20:41
+        String[] dateSplit = date.split("/");
+        String[] timeSplit = time.split(":");
+        int year = Integer.parseInt(dateSplit[2]);
+        int month = Integer.parseInt(dateSplit[1]);
+        int day = Integer.parseInt(dateSplit[0]);
+        int hour = Integer.parseInt(timeSplit[0]);
+        int min = Integer.parseInt(timeSplit[1]);
+        // current format is in IST, convert to GMT which is 5:30 hrs behind IST
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year,month,day,hour,min,0);
+        // remove 5hrs and 30 mins from IST
+        calendar.add(Calendar.HOUR_OF_DAY, -5);
+        calendar.add(Calendar.MINUTE, -30);
+        //get gmt date time
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH);
+        if(month == 0)
+            month = 12;
+        day = calendar.get(Calendar.DATE);
+        hour = calendar.get(Calendar.HOUR_OF_DAY);
+        min = calendar.get(Calendar.MINUTE);
+        gmtString = year + "-"
+                + (String.valueOf(month).length() == 1 ? "0" + month : month) + "-"
+                + (String.valueOf(day).length() == 1 ? "0" + day : day) + "T"
+                + (String.valueOf(hour).length() == 1 ? "0" + hour : hour) + ":"
+                + (String.valueOf(min).length() == 1 ? "0" + min : min)
+                + ":00.000Z";
+        Log.e(TAG, "getGMTDateTime: " + calendar.getTimeInMillis());
+        return gmtString;
+    }
+
+    public static Map<String, String> getDateTimeForEditorForm(String displayDateTime) {
+        Map<String, String> datetime = new HashMap<>();
+        String[] dtTT = displayDateTime.split(" ");
+        String date = dtTT[0] + "/" + nameVsNumberMap.get(dtTT[1]) + "/" + dtTT[2];
+        String time = dtTT[3];
+        datetime.put("date", date);
+        datetime.put("time", time);
+        return datetime;
+    }
 
     static {
         String[] monthList = new String[]{ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" };
         for (int i = 0; i < 12; i++) {
+            nameVsNumberMap.put(monthList[i], i + 1);
             numberVsNameMap.put( i + 1, monthList[i]);
         }
     }

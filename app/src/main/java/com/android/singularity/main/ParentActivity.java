@@ -10,11 +10,14 @@ import android.widget.TextView;
 
 import com.android.singularity.R;
 import com.android.singularity.activity.TaskEditor;
+import com.android.singularity.fragment.EmailFragment;
 import com.android.singularity.fragment.TasksFragment;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONObject;
 
 public class ParentActivity extends AppCompatActivity {
 
@@ -23,9 +26,11 @@ public class ParentActivity extends AppCompatActivity {
 
     public interface ItemClickListener {
         void onClick(Task task);
+        void OnJSONObjectClick(JSONObject jsonObject);
     }
     public static ItemClickListener itemClickListener;
     public static Task selectedTask;
+    public static JSONObject selectedJSONObj;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,22 +39,45 @@ public class ParentActivity extends AppCompatActivity {
         DateTV = findViewById(R.id.date);
         DayTV = findViewById(R.id.day);
         AddBtnText = findViewById(R.id.add_btn_text);
-        findViewById(R.id.add_task_btn).setOnClickListener(v -> openEditor(null));
+        findViewById(R.id.add_task_btn).setOnClickListener(v -> openEditor(null, null));
         //get today's date and update the view
         String currentDate = new DateTime().getDateForUser();
         setDayDate(currentDate);
         loadTasksFragment(Constants.TYPE_ALERT);
         setupBottomNavBar();
-        itemClickListener = this::openEditor;
+        itemClickListener = new ItemClickListener() {
+            @Override
+            public void onClick(Task task) {
+                openEditor(task, null);
+            }
+
+            @Override
+            public void OnJSONObjectClick(JSONObject jsonObject) {
+                openEditor(null, jsonObject);
+            }
+        };
     }
 
-    private void openEditor(Task task) {
-        selectedTask = task;
+    @SuppressLint("NonConstantResourceId")
+    private void openEditor(Task task, JSONObject jsonObject) {
         int type;
-        if(bottomNavigationView.getSelectedItemId() == R.id.alerts) {
-            type = Constants.TYPE_ALERT;
+        switch (bottomNavigationView.getSelectedItemId()){
+            case R.id.alerts:
+                type = Constants.TYPE_ALERT;
+                break;
+            case R.id.email:
+                type = Constants.TYPE_EMAIL;
+                break;
+            case R.id.notes:
+                type = Constants.TYPE_NOTE;
+                break;
+            default:
+                type = 0;
+        }
+        if(type != Constants.TYPE_EMAIL) {
+            selectedTask = task;
         } else {
-            type = Constants.TYPE_NOTE;
+            selectedJSONObj = jsonObject;
         }
         Intent intent = new Intent(getApplicationContext(), TaskEditor.class);
         intent.putExtra("type", type);
@@ -70,12 +98,18 @@ public class ParentActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.alerts);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
+                case R.id.email:
+                    setAddBtnText("Add Alert");
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.frame_layout, new EmailFragment());
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                    return true;
                 case R.id.alerts:
                     setAddBtnText("Add Task");
                     loadTasksFragment(Constants.TYPE_ALERT);
                     return true;
                 case R.id.notes:
-                    //todo load notes fragment
                     setAddBtnText("Add Note");
                     loadTasksFragment(Constants.TYPE_NOTE);
                     return true;

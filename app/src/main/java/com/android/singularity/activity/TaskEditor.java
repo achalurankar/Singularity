@@ -1,8 +1,10 @@
 package com.android.singularity.activity;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -21,6 +23,14 @@ import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
+import com.android.singularity.util.Loader;
+import com.andromeda.callouts.CalloutManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TaskEditor extends AppCompatActivity {
 
@@ -29,6 +39,7 @@ public class TaskEditor extends AppCompatActivity {
     TextView Date, TimeTextView;
     String TimeValue = "Select time";
     Task mTask;
+    JSONObject mJSONObj;
     int taskType;
 
     @Override
@@ -48,30 +59,47 @@ public class TaskEditor extends AppCompatActivity {
         ClockBtn.setOnClickListener(v -> popupClock());
         SaveBtn.setOnClickListener(v -> updateTask());
         findViewById(R.id.back).setOnClickListener(v -> finish());
-        mTask = ParentActivity.selectedTask;
         taskType = getIntent().getIntExtra("type", 0);
-        if(taskType == Constants.TYPE_NOTE) {
+        if (taskType == Constants.TYPE_EMAIL)
+            mJSONObj = ParentActivity.selectedJSONObj;
+        else
+            mTask = ParentActivity.selectedTask;
+        if (taskType == Constants.TYPE_NOTE) {
             CalendarBtn.setVisibility(View.GONE);
             ClockBtn.setVisibility(View.GONE);
             findViewById(R.id.time_label).setVisibility(View.GONE);
             findViewById(R.id.date_label).setVisibility(View.GONE);
             ((TextView) findViewById(R.id.header_label)).setText("Add new note");
         }
-        if (mTask != null) {
+        if (mTask != null || mJSONObj != null) {
             setupForm();
         } else
             Date.setText(new DateTime().getDateForUser());
     }
 
     private void setupForm() {
-        TaskName.setText(mTask.getName());
-        Description.setText(mTask.getDescription());
-        Date.setText(mTask.getDate());
-        TimeTextView.setText(mTask.getTime());
-        TimeValue = mTask.getTime();
+        if (taskType == Constants.TYPE_EMAIL) {
+            Map<String, String> datetime = new HashMap<>();
+            try {
+                datetime = DateTime.getDateTimeForEditorForm(mJSONObj.getString("Display_Date_Time__c"));
+                TaskName.setText(mJSONObj.getString("Name"));
+                Description.setText(mJSONObj.getString("Description__c"));
+            } catch (JSONException ignored) {
+
+            }
+            Date.setText(datetime.get("date"));
+            TimeTextView.setText(datetime.get("time"));
+        } else {
+            TaskName.setText(mTask.getName());
+            Description.setText(mTask.getDescription());
+            Date.setText(mTask.getDate());
+            TimeTextView.setText(mTask.getTime());
+            TimeValue = mTask.getTime();
+        }
     }
 
     private void updateTask() {
+        hideKeyboard();
         String name = TaskName.getText().toString().trim();
         String description = Description.getText().toString().trim();
         int taskId = 0;
@@ -86,7 +114,7 @@ public class TaskEditor extends AppCompatActivity {
             return;
         }
         String date = "";
-        if(taskType == Constants.TYPE_ALERT) {
+        if (taskType != Constants.TYPE_NOTE) {
             date = Date.getText().toString();
             if (date.toLowerCase().contains("date")) {
                 Toast.makeText(getApplicationContext(), "Date not selected!", Toast.LENGTH_SHORT).show();
@@ -99,23 +127,70 @@ public class TaskEditor extends AppCompatActivity {
         }
 
         //upsert task
-        Task task = new Task(taskType, taskId, name, date, TimeValue, description, isNotified, isCompleted);
-        DbQuery dbQuery = new DbQuery(this);
-        task.setId(dbQuery.upsertTask(task));
-        if (mTask == null) {
-            Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
-        }
+        if (taskType == Constants.TYPE_EMAIL) {
+            String time = TimeTextView.getText().toString();
+            String gmtDateTimeValue = DateTime.getGMTDateTime(date, time);
+            JSONObject requestStructure = new JSONObject();
+            JSONObject params = new JSONObject();
+            try {
+                String id = "";
+                if(mJSONObj != null)
+                    id = mJSONObj.getString("Id");
+                requestStructure.put("id", id);
+                requestStructure.put("name", name);
+                requestStructure.put("taskTime", gmtDateTimeValue);
+                requestStructure.put("isCompleted", false);
+                requestStructure.put("description", description);
+                requestStructure.put("action", "upsert");
+                params.put("requestStructure", requestStructure.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
+                @Override
+                public void onSuccess(String s) {
+                    TaskEditor.this.runOnUiThread(() -> {
+                        //call event change listener invoker
+                        EventDispatcher.callOnDataChange();
+                        //close current activity
+                        TaskEditor.this.finish();
+                    });
+                }
 
-        if(taskType == Constants.TYPE_ALERT) {
-            // schedule task in future
-            Scheduler.schedule(task, this);
+                @Override
+                public void onError(String error) {
+                    TaskEditor.this.runOnUiThread(() -> {
+                        String message = "Something went wrong!";
+                        if(error.contains("will never fire"))
+                            message = "Task time cannot be in past";
+                        Toast.makeText(TaskEditor.this, message, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        } else {
+            Task task = new Task(taskType, taskId, name, date, TimeValue, description, isNotified, isCompleted);
+            DbQuery dbQuery = new DbQuery(this);
+            task.setId(dbQuery.upsertTask(task));
+            if (mTask == null) {
+                Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
+            }
+
+            if (taskType == Constants.TYPE_ALERT) {
+                // schedule task in future
+                Scheduler.schedule(task, this);
+            }
         }
         //call event change listener invoker
         EventDispatcher.callOnDataChange();
         //close current activity
         finish();
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(findViewById(R.id.container).getWindowToken(), 0);
     }
 
     private void popupCalendar() {
@@ -151,6 +226,12 @@ public class TaskEditor extends AppCompatActivity {
         ConfirmBtn.setOnClickListener(v -> {
             int hours = timePicker.getHour();
             int minutes = timePicker.getMinute();
+            if(taskType == Constants.TYPE_EMAIL) {
+                TimeTextView.setText(hours + ":" + minutes);
+                TimeValue = "";
+                dialog.dismiss();
+                return;
+            }
             String meridiem = "";
             //converting to 12hr format for user perspective
             if (hours > 12) {
