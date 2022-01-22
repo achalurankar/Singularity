@@ -182,10 +182,12 @@ public class TaskEditor extends AppCompatActivity {
                 Scheduler.schedule(task, this);
             }
         }
-        //call event change listener invoker
-        EventDispatcher.callOnDataChange();
-        //close current activity
-        finish();
+        if(taskType != Constants.TYPE_EMAIL) {
+            //call event change listener invoker
+            EventDispatcher.callOnDataChange();
+            //close current activity
+            finish();
+        }
     }
 
     private void hideKeyboard() {
