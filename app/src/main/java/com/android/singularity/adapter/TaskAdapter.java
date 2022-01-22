@@ -68,9 +68,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         });
 
         if(fragmentType == Constants.TYPE_NOTE) {
-            holder.TimeLayout.setVisibility(View.GONE);
-            holder.CompleteBtn.setVisibility(View.GONE);
-            holder.TaskStatus.setVisibility(View.GONE);
+            holder.TimeLayout.setVisibility(View.INVISIBLE);
+            holder.CompleteBtn.setVisibility(View.INVISIBLE);
+            holder.TaskStatus.setVisibility(View.INVISIBLE);
             return;
         }
         String tt = task.getTime();
