@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.android.singularity.R;
 import com.android.singularity.activity.TaskEditor;
 import com.android.singularity.fragment.EmailFragment;
+import com.android.singularity.fragment.NotesFragment;
 import com.android.singularity.fragment.TasksFragment;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
@@ -43,7 +44,11 @@ public class ParentActivity extends AppCompatActivity {
         //get today's date and update the view
         String currentDate = new DateTime().getDateForUser();
         setDayDate(currentDate);
-        loadTasksFragment(Constants.TYPE_ALERT);
+        //load tasks fragment  initially
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, new TasksFragment());
+        transaction.addToBackStack(null);
+        transaction.commit();
         setupBottomNavBar();
         itemClickListener = new ItemClickListener() {
             @Override
@@ -85,37 +90,29 @@ public class ParentActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
-    private void loadTasksFragment(int type) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, new TasksFragment(type));
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
     @SuppressLint("NonConstantResourceId")
     public void setupBottomNavBar() {
         bottomNavigationView = findViewById(R.id.nav_bar);
         bottomNavigationView.setSelectedItemId(R.id.alerts);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             switch (item.getItemId()) {
                 case R.id.email:
                     setAddBtnText("Add Alert");
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.frame_layout, new EmailFragment());
-                    transaction.addToBackStack(null);
-                    transaction.commit();
-                    return true;
+                    break;
                 case R.id.alerts:
                     setAddBtnText("Add Task");
-                    loadTasksFragment(Constants.TYPE_ALERT);
-                    return true;
+                    transaction.replace(R.id.frame_layout, new TasksFragment());
+                    break;
                 case R.id.notes:
                     setAddBtnText("Add Note");
-                    loadTasksFragment(Constants.TYPE_NOTE);
-                    return true;
-                default:
-                    return false;
+                    transaction.replace(R.id.frame_layout, new NotesFragment());
+                    break;
             }
+            transaction.addToBackStack(null);
+            transaction.commit();
+            return true;
         });
     }
 

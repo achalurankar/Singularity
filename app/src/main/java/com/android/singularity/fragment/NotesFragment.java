@@ -1,6 +1,13 @@
 package com.android.singularity.fragment;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,15 +16,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.android.singularity.R;
 import com.android.singularity.adapter.TaskAdapter;
-import com.android.singularity.main.ParentActivity;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DbQuery;
@@ -27,7 +27,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TasksFragment extends Fragment {
+public class NotesFragment  extends Fragment {
 
     private static final String TAG = "TasksFragment";
     // view variables
@@ -38,19 +38,17 @@ public class TasksFragment extends Fragment {
     // db handler
     DbQuery dbQuery;
 
-    public TasksFragment() {
+    public NotesFragment() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tasks, container, false);
         dbQuery = new DbQuery(getActivity());
@@ -68,7 +66,7 @@ public class TasksFragment extends Fragment {
 
     public void getTasks() {
         NoResultsLayout.setVisibility(View.INVISIBLE);
-        mList = dbQuery.getTasks(Constants.TYPE_ALERT);
+        mList = dbQuery.getTasks(Constants.TYPE_NOTE);
         if (mList.size() == 0) {
             NoResultsLayout.setVisibility(View.VISIBLE);
         }
@@ -76,7 +74,7 @@ public class TasksFragment extends Fragment {
     }
 
     public void configureAdapter() {
-        mAdapter = new TaskAdapter(getActivity(), mList, Constants.TYPE_ALERT);
+        mAdapter = new TaskAdapter(getActivity(), mList, Constants.TYPE_NOTE);
         mRecyclerView.setAdapter(mAdapter);
     }
 

@@ -27,7 +27,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
 
     public FragmentActivity mContext;
     List<Task> list;
-    int fragmentType;
+    static int fragmentType;
 
     public TaskAdapter(FragmentActivity context, List<Task> list, int type) {
         mContext = context;
@@ -52,7 +52,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
     @NonNull
     @Override
     public CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(mContext).inflate(R.layout.tasks_item, parent, false);
+        View v;
+        if(fragmentType == Constants.TYPE_ALERT)
+            v = LayoutInflater.from(mContext).inflate(R.layout.tasks_item, parent, false);
+        else
+            v = LayoutInflater.from(mContext).inflate(R.layout.notes_item, parent, false);
         return new CustomViewHolder(v);
     }
 
@@ -68,9 +72,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         });
 
         if(fragmentType == Constants.TYPE_NOTE) {
-            holder.TimeLayout.setVisibility(View.INVISIBLE);
-            holder.CompleteBtn.setVisibility(View.INVISIBLE);
-            holder.TaskStatus.setVisibility(View.INVISIBLE);
             return;
         }
         String tt = task.getTime();
@@ -105,13 +106,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         public CustomViewHolder(@NonNull View itemView) {
             super(itemView);
             Item = itemView.findViewById(R.id.item);
-            CompleteBtn = itemView.findViewById(R.id.complete_btn);
-            TimeLayout = itemView.findViewById(R.id.time_layout);
-            TaskStatus = itemView.findViewById(R.id.task_status);
             Name = itemView.findViewById(R.id.name);
             Description = itemView.findViewById(R.id.description);
-            Time = itemView.findViewById(R.id.time);
-            Date = itemView.findViewById(R.id.date);
+            CompleteBtn = itemView.findViewById(R.id.complete_btn);
+            if(fragmentType != Constants.TYPE_NOTE) {
+                TimeLayout = itemView.findViewById(R.id.time_layout);
+                TaskStatus = itemView.findViewById(R.id.task_status);
+                Time = itemView.findViewById(R.id.time);
+                Date = itemView.findViewById(R.id.date);
+            }
         }
     }
 
