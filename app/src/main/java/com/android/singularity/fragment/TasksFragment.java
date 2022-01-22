@@ -112,6 +112,6 @@ public class TasksFragment extends Fragment {
     }
 
     private void removeFromDatabase(Task item) {
-        dbQuery.deleteTask(item);
+        dbQuery.deleteTask(item.getId());
     }
 }

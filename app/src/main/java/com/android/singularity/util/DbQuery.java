@@ -45,7 +45,11 @@ public class DbQuery {
     // get tasks for a input date
     public List<Task> getTasks(int type) {
         String[] args = new String[] { String.valueOf(type) };
-        Cursor cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY is_completed, date_time;", args);
+        Cursor cursor;
+        if(type == Constants.TYPE_NOTE) {
+            cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY task_id;", args);
+        } else
+            cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY is_completed, date_time;", args);
         cursor.moveToFirst();
         List<Task> tasks = new ArrayList<>();
         if (cursor.getCount() != 0) {
@@ -121,8 +125,17 @@ public class DbQuery {
         }
     }
 
-    public void deleteTask(Task task) {
-        String[] args = new String[]{String.valueOf(task.getId())};
+    public void deleteTask(int taskId) {
+        String[] args = new String[]{String.valueOf(taskId)};
         ref.delete("tasks", "task_id = ?", args);
+    }
+
+    public void insertNote(Task task) {
+        ContentValues rows = new ContentValues();
+        rows.put("task_id", task.getId());
+        rows.put("task_name", task.getName());
+        rows.put("description", task.getDescription());
+        rows.put("task_type", task.getTaskType());
+        ref.insert("tasks", null, rows);
     }
 }
