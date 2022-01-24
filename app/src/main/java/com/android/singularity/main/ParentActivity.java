@@ -95,6 +95,9 @@ public class ParentActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.nav_bar);
         bottomNavigationView.setSelectedItemId(R.id.alerts);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            if(bottomNavigationView.getSelectedItemId() == item.getItemId()) {
+                return false; // already in that fragment, no need to reopen same fragment
+            }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             switch (item.getItemId()) {
                 case R.id.email:
