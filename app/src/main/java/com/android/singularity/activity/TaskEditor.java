@@ -3,11 +3,15 @@ package com.android.singularity.activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -15,7 +19,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.singularity.R;
-import com.android.singularity.fragment.TasksFragment;
 import com.android.singularity.main.ParentActivity;
 import com.android.singularity.modal.Task;
 import com.android.singularity.service.Scheduler;
@@ -23,7 +26,6 @@ import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
-import com.android.singularity.util.Loader;
 import com.andromeda.callouts.CalloutManager;
 
 import org.json.JSONException;
@@ -41,6 +43,9 @@ public class TaskEditor extends AppCompatActivity {
     Task mTask;
     JSONObject mJSONObj;
     int taskType;
+    // spinner
+    Spinner frequencySpinner;
+    ArrayAdapter spinnerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +76,16 @@ public class TaskEditor extends AppCompatActivity {
             findViewById(R.id.date_label).setVisibility(View.GONE);
             ((TextView) findViewById(R.id.header_label)).setText("Add new note");
         }
+
+        // frequency spinner population
+        if(taskType == Constants.TYPE_EMAIL) {
+            findViewById(R.id.frequency_layout).setVisibility(View.VISIBLE);
+            frequencySpinner = findViewById(R.id.frequency_spinner);
+            String[] options = new String[] { "One time", "Weekly", "Monthly" };
+            spinnerAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, options);
+            spinnerAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
+            frequencySpinner.setAdapter(spinnerAdapter);
+        }
         if (mTask != null || mJSONObj != null) {
             setupForm();
         } else
@@ -83,12 +98,15 @@ public class TaskEditor extends AppCompatActivity {
             try {
                 datetime = DateTime.getDateTimeForEditorForm(mJSONObj.getString("Display_Date_Time__c"));
                 TaskName.setText(mJSONObj.getString("Name"));
+                frequencySpinner.setSelection(spinnerAdapter.getPosition(mJSONObj.getString("Frequency__c")));
+                //if no value, it will throw exception
                 Description.setText(mJSONObj.getString("Description__c"));
-            } catch (JSONException ignored) {
-
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
             Date.setText(datetime.get("date"));
             TimeTextView.setText(datetime.get("time"));
+            TimeValue = "";
         } else {
             TaskName.setText(mTask.getName());
             Description.setText(mTask.getDescription());
@@ -141,6 +159,7 @@ public class TaskEditor extends AppCompatActivity {
                 requestStructure.put("taskTime", gmtDateTimeValue);
                 requestStructure.put("isCompleted", false);
                 requestStructure.put("description", description);
+                requestStructure.put("frequency", frequencySpinner.getSelectedItem());
                 requestStructure.put("action", "upsert");
                 params.put("requestStructure", requestStructure.toString());
             } catch (JSONException e) {

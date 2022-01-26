@@ -10,6 +10,7 @@
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/drawable/bell_vector_selected.xml" value="0.19583333333333333" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/drawable/dashboard_selector.xml" value="0.19583333333333333" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/drawable/email_selector.xml" value="0.19583333333333333" />
+        <entry key="..\:/Android-Projects/Singularity/app/src/main/res/drawable/form_et_bg.xml" value="0.19583333333333333" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/drawable/notes_selector.xml" value="0.19583333333333333" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/drawable/notes_vector_not_selected.xml" value="0.19583333333333333" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/drawable/notes_vector_selected.xml" value="0.19583333333333333" />
@@ -18,8 +19,9 @@
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/activity_main.xml" value="0.1796875" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/activity_parent.xml" value="0.1796875" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/activity_splash.xml" value="0.1796875" />
-        <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/activity_task_editor.xml" value="0.1796875" />
+        <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/activity_task_editor.xml" value="0.4466666666666667" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/activity_task_list.xml" value="0.1796875" />
+        <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/custom_spinner_item.xml" value="0.1796875" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/fragment_email.xml" value="0.1796875" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/fragment_notes.xml" value="0.1" />
         <entry key="..\:/Android-Projects/Singularity/app/src/main/res/layout/fragment_tasks.xml" value="0.1796875" />

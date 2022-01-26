@@ -8,10 +8,10 @@
     android:padding="15dp">
 
     <RelativeLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:id="@+id/container">
+        android:padding="15dp">
 
         <ImageView
             android:id="@+id/back"
@@ -27,7 +27,7 @@
             android:layout_margin="10dp"
             android:orientation="vertical">
 
-            <!--Header-->
+            <!--            Header-->
             <TextView
                 android:id="@+id/header_label"
                 android:layout_width="wrap_content"
@@ -38,6 +38,7 @@
                 android:textColor="@color/task_adder_tv_color"
                 android:textSize="18sp" />
 
+            <!--            Icon-->
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
@@ -45,6 +46,7 @@
                 android:layout_margin="15dp"
                 android:src="@drawable/add_task_icon" />
 
+            <!--            task name title-->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,29 +55,32 @@
                 android:textColor="@color/task_adder_tv_color"
                 android:textSize="@dimen/form_text_views_size" />
 
+            <!--            task name edit text-->
             <EditText
                 android:id="@+id/task_name_et"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/form_et_bg"
-                android:paddingLeft="10dp"
                 android:fontFamily="@font/bubblegum_sans"
-                android:textColor="@color/task_adder_value"
+                android:paddingLeft="10dp"
                 android:paddingTop="5dp"
-                android:textSize="15sp"
                 android:paddingRight="10dp"
-                android:paddingBottom="5dp" />
+                android:paddingBottom="5dp"
+                android:textColor="@color/task_adder_value"
+                android:textSize="15sp" />
 
+            <!--            date title-->
             <TextView
                 android:id="@+id/date_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:padding="@dimen/form_text_views_padding"
-                android:textColor="@color/task_adder_tv_color"
                 android:text="Date"
+                android:textColor="@color/task_adder_tv_color"
                 android:textSize="@dimen/form_text_views_size" />
 
+            <!--            date selector-->
             <RelativeLayout
                 android:id="@+id/date_btn"
                 android:layout_width="match_parent"
@@ -86,9 +91,9 @@
                     android:id="@+id/date_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/task_adder_value"
                     android:padding="@dimen/form_text_views_padding"
                     android:text="Select date"
+                    android:textColor="@color/task_adder_value"
                     android:textSize="@dimen/form_text_views_size" />
 
                 <ImageView
@@ -103,16 +108,18 @@
 
             </RelativeLayout>
 
+            <!--            time title-->
             <TextView
                 android:id="@+id/time_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/task_adder_tv_color"
                 android:padding="@dimen/form_text_views_padding"
                 android:text="Time"
+                android:textColor="@color/task_adder_tv_color"
                 android:textSize="@dimen/form_text_views_size" />
 
+            <!--            time selector-->
             <RelativeLayout
                 android:id="@+id/time_btn"
                 android:layout_width="match_parent"
@@ -123,9 +130,9 @@
                     android:id="@+id/time_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/task_adder_value"
                     android:padding="@dimen/form_text_views_padding"
                     android:text="Select time"
+                    android:textColor="@color/task_adder_value"
                     android:textSize="@dimen/form_text_views_size" />
 
 
@@ -141,28 +148,71 @@
 
             </RelativeLayout>
 
+            <!--            description title-->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/task_adder_tv_color"
                 android:padding="@dimen/form_text_views_padding"
                 android:text="Description (Optional)"
+                android:textColor="@color/task_adder_tv_color"
                 android:textSize="@dimen/form_text_views_size" />
 
+            <!--            description edit text-->
             <EditText
                 android:id="@+id/description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/form_et_bg"
-                android:paddingLeft="10dp"
-                android:textColor="@color/task_adder_value"
-                android:paddingTop="5dp"
-                android:textSize="15sp"
                 android:fontFamily="@font/bubblegum_sans"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
                 android:paddingRight="10dp"
-                android:paddingBottom="5dp" />
+                android:paddingBottom="5dp"
+                android:textColor="@color/task_adder_value"
+                android:textSize="15sp" />
 
+            <!--            frequency layout-->
+            <LinearLayout
+                android:id="@+id/frequency_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="vertical">
+                <!--            reminder frequency title-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:padding="@dimen/form_text_views_padding"
+                    android:text="Reminder Frequency"
+                    android:textColor="@color/task_adder_tv_color"
+                    android:textSize="@dimen/form_text_views_size" />
+
+                <!--            frequency spinner-->
+                <Spinner
+                    android:id="@+id/frequency_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:background="@drawable/form_et_bg"
+                    android:prompt="@string/app_name"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+<!--            <EditText-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="20dp"-->
+<!--                android:background="@drawable/form_et_bg"-->
+<!--                android:fontFamily="@font/bubblegum_sans"-->
+<!--                android:paddingLeft="10dp"-->
+<!--                android:paddingTop="5dp"-->
+<!--                android:paddingRight="10dp"-->
+<!--                android:paddingBottom="5dp"-->
+<!--                android:textColor="@color/task_adder_value"-->
+<!--                android:textSize="15sp" />-->
+
+            <!--            save btn-->
             <RelativeLayout
                 android:id="@+id/save_btn"
                 android:layout_width="wrap_content"
