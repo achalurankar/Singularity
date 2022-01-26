@@ -90,7 +90,11 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.CustomViewHo
             });
             String tt = task.getString("Display_Date_Time__c");
             String[] tt_arr = tt.split(" ");
-            tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2] + "\n     " + tt_arr[3];
+            if(task.getString("Frequency__c").equals("One time"))
+                tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2];
+            else
+                tt = task.getString("Frequency__c");
+            tt += "\n" + tt_arr[3];
             holder.Time.setText(tt);
 //            holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
             //check status of task
