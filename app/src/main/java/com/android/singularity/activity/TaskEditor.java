@@ -26,7 +26,7 @@ import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
-import com.andromeda.callouts.CalloutManager;
+import com.andromeda.calloutmanager.CalloutManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;

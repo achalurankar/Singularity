@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.android.singularity"
         minSdkVersion 28
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -36,7 +36,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.agrawalsuneet.androidlibs:dotsloader:1.4'
-    implementation files('D:\\Android-Projects\\Modules\\CalloutManager\\build\\outputs\\aar\\CalloutManager-debug.aar')
+    implementation 'com.github.achalurankar.api-callout-manager:calloutmanager:1.0.0'
     testImplementation 'junit:junit:4.+'
     implementation "android.arch.lifecycle:extensions:1.1.1"
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

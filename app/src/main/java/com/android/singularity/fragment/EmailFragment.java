@@ -25,8 +25,8 @@ import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.util.Loader;
-import com.andromeda.callouts.CalloutManager;
-import com.andromeda.callouts.Session;
+import com.andromeda.calloutmanager.CalloutManager;
+import com.andromeda.calloutmanager.Session;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
