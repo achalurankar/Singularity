@@ -81,7 +81,7 @@ public class TaskEditor extends AppCompatActivity {
         if(taskType == Constants.TYPE_EMAIL) {
             findViewById(R.id.frequency_layout).setVisibility(View.VISIBLE);
             frequencySpinner = findViewById(R.id.frequency_spinner);
-            String[] options = new String[] { "One time", "Weekly", "Monthly" };
+            String[] options = new String[] { "One time", "Daily", "Weekly", "Monthly" };
             spinnerAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, options);
             spinnerAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
             frequencySpinner.setAdapter(spinnerAdapter);
@@ -101,8 +101,7 @@ public class TaskEditor extends AppCompatActivity {
                 frequencySpinner.setSelection(spinnerAdapter.getPosition(mJSONObj.getString("Frequency__c")));
                 //if no value, it will throw exception
                 Description.setText(mJSONObj.getString("Description__c"));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            } catch (JSONException ignored) {
             }
             Date.setText(datetime.get("date"));
             TimeTextView.setText(datetime.get("time"));
