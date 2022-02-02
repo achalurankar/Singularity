@@ -27,8 +27,10 @@ public class ParentActivity extends AppCompatActivity {
 
     public interface ItemClickListener {
         void onClick(Task task);
+
         void OnJSONObjectClick(JSONObject jsonObject);
     }
+
     public static ItemClickListener itemClickListener;
     public static Task selectedTask;
     public static JSONObject selectedJSONObj;
@@ -66,7 +68,7 @@ public class ParentActivity extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     private void openEditor(Task task, JSONObject jsonObject) {
         int type;
-        switch (bottomNavigationView.getSelectedItemId()){
+        switch (bottomNavigationView.getSelectedItemId()) {
             case R.id.alerts:
                 type = Constants.TYPE_ALERT;
                 break;
@@ -79,7 +81,7 @@ public class ParentActivity extends AppCompatActivity {
             default:
                 type = 0;
         }
-        if(type != Constants.TYPE_EMAIL) {
+        if (type != Constants.TYPE_EMAIL) {
             selectedTask = task;
         } else {
             selectedJSONObj = jsonObject;
@@ -95,7 +97,7 @@ public class ParentActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.nav_bar);
         bottomNavigationView.setSelectedItemId(R.id.alerts);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            if(bottomNavigationView.getSelectedItemId() == item.getItemId()) {
+            if (bottomNavigationView.getSelectedItemId() == item.getItemId()) {
                 return false; // already in that fragment, no need to reopen same fragment
             }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

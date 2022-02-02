@@ -2,12 +2,10 @@ package com.android.singularity.fragment;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -17,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
 import com.android.singularity.adapter.TaskAdapter;
-import com.android.singularity.main.ParentActivity;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DbQuery;

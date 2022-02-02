@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.singularity.R;
 import com.android.singularity.main.ParentActivity;
+import com.android.singularity.util.Constants;
+import com.andromeda.calloutmanager.Session;
 
 public class Splash extends AppCompatActivity {
 
@@ -17,6 +19,9 @@ public class Splash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         //for full screen activity, removing status bar
+        //store access token for future use
+        if (!Session.isTokenValid)
+            Session.storeAccessToken(Constants.ACCESS_TOKEN_ENDPOINT);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //open first activity
         openActivity();

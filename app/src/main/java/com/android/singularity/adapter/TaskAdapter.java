@@ -53,7 +53,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
     @Override
     public CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v;
-        if(fragmentType == Constants.TYPE_ALERT)
+        if (fragmentType == Constants.TYPE_ALERT)
             v = LayoutInflater.from(mContext).inflate(R.layout.tasks_item, parent, false);
         else
             v = LayoutInflater.from(mContext).inflate(R.layout.notes_item, parent, false);
@@ -66,12 +66,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         holder.Name.setText(task.getName());
         holder.Description.setText(task.getDescription().length() == 0 ? "No description provided" : task.getDescription());
         holder.Item.setOnClickListener(v -> {
-            if(ParentActivity.itemClickListener != null) {
+            if (ParentActivity.itemClickListener != null) {
                 ParentActivity.itemClickListener.onClick(task);
             }
         });
 
-        if(fragmentType == Constants.TYPE_NOTE) {
+        if (fragmentType == Constants.TYPE_NOTE) {
             return;
         }
         String tt = task.getTime();
@@ -109,7 +109,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
             Name = itemView.findViewById(R.id.name);
             Description = itemView.findViewById(R.id.description);
             CompleteBtn = itemView.findViewById(R.id.complete_btn);
-            if(fragmentType != Constants.TYPE_NOTE) {
+            if (fragmentType != Constants.TYPE_NOTE) {
                 TimeLayout = itemView.findViewById(R.id.time_layout);
                 TaskStatus = itemView.findViewById(R.id.task_status);
                 Time = itemView.findViewById(R.id.time);

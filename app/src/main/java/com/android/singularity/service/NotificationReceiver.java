@@ -8,10 +8,10 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+
 import com.android.singularity.R;
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.DbQuery;
@@ -27,7 +27,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         Log.e("AlarmReceiver", "onReceive: " + taskId);
         DbQuery dbQuery = new DbQuery(context);
         Task task = dbQuery.getTask(taskId);
-        if(task != null && task.getIsNotified() == 0){
+        if (task != null && task.getIsNotified() == 0) {
             //show notification for incomplete tasks
             task.setIsNotified(1);
             generateNotification(task, context);
@@ -43,7 +43,7 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.app_icon_vector)
                 .setContentTitle(task.getName());
         if (task.getDescription().length() < 35) {
-            if(task.getDescription().length() == 0) {
+            if (task.getDescription().length() == 0) {
                 builder.setContentText("No description provided");
             } else {
                 builder.setContentText(task.getDescription());

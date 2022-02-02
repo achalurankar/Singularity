@@ -1,15 +1,7 @@
 package com.android.singularity.fragment;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,15 +10,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.singularity.R;
-import com.android.singularity.activity.TaskEditor;
 import com.android.singularity.adapter.EmailAdapter;
 import com.android.singularity.util.Constants;
-import com.android.singularity.util.DateTime;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.util.Loader;
 import com.andromeda.calloutmanager.CalloutManager;
-import com.andromeda.calloutmanager.Session;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -58,8 +53,6 @@ public class EmailFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_email, container, false);
-        if(!Session.isTokenValid)
-            Session.storeAccessToken(Constants.ACCESS_TOKEN_ENDPOINT);
         DateTV = view.findViewById(R.id.date);
         DayTV = view.findViewById(R.id.day);
         NoResultsLayout = view.findViewById(R.id.no_result_layout);

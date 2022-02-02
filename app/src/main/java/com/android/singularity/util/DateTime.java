@@ -30,15 +30,15 @@ public class DateTime {
         int day = Integer.parseInt(arr[0]);
         int month = Integer.parseInt(arr[1]);
         formatted = "" + day;
-        if(day != 11 && day != 12 && day != 13) {
+        if (day != 11 && day != 12 && day != 13) {
             switch (arr[0].charAt(1)) {
-                case '1' :
+                case '1':
                     formatted += "st ";
                     break;
-                case '2' :
+                case '2':
                     formatted += "nd ";
                     break;
-                case '3' :
+                case '3':
                     formatted += "rd ";
                     break;
                 default:
@@ -71,14 +71,14 @@ public class DateTime {
         int min = Integer.parseInt(timeSplit[1]);
         // current format is in IST, convert to GMT which is 5:30 hrs behind IST
         Calendar calendar = Calendar.getInstance();
-        calendar.set(year,month,day,hour,min,0);
+        calendar.set(year, month, day, hour, min, 0);
         // remove 5hrs and 30 mins from IST
         calendar.add(Calendar.HOUR_OF_DAY, -5);
         calendar.add(Calendar.MINUTE, -30);
         //get gmt date time
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
-        if(month == 0)
+        if (month == 0)
             month = 12;
         day = calendar.get(Calendar.DATE);
         hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -104,10 +104,10 @@ public class DateTime {
     }
 
     static {
-        String[] monthList = new String[]{ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" };
+        String[] monthList = new String[]{"Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"};
         for (int i = 0; i < 12; i++) {
             nameVsNumberMap.put(monthList[i], i + 1);
-            numberVsNameMap.put( i + 1, monthList[i]);
+            numberVsNameMap.put(i + 1, monthList[i]);
         }
     }
 
@@ -140,11 +140,11 @@ public class DateTime {
     //method related to current instance of date
     public String getDateForUser() {
         String day, month;
-        if(this.mDay < 10)
+        if (this.mDay < 10)
             day = "0" + this.mDay;
         else
             day = "" + this.mDay;
-        if(this.mMonth < 10)
+        if (this.mMonth < 10)
             month = "0" + this.mMonth;
         else
             month = "" + this.mMonth;
@@ -152,15 +152,15 @@ public class DateTime {
     }
 
     // static utility methods
-    @NonNull public static String getDayOfWeek(@NonNull String date) {
+    @NonNull
+    public static String getDayOfWeek(@NonNull String date) {
         try {
             Date obj;
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             DateFormat dayFormat = new SimpleDateFormat("EEEE");
             obj = dateFormat.parse(date);
             return dayFormat.format(obj);
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             System.out.println("Unparseable using " + e.getMessage());
         }
         return "";
@@ -172,20 +172,19 @@ public class DateTime {
         String[] timeArr = timeValue.split(":");
         int hour = Integer.parseInt(timeArr[0]);
         int min = Integer.parseInt(timeArr[1]);
-        if(timeArr[2].equals("PM")) {
-            if(hour != 12)
+        if (timeArr[2].equals("PM")) {
+            if (hour != 12)
                 hour += 12;
-        }
-        else{
-            if(hour == 12)
+        } else {
+            if (hour == 12)
                 hour = 0;
         }
         String minStr = "", hourStr = "";
-        if(min < 10)
+        if (min < 10)
             minStr = "0" + min;
         else
             minStr = min + "";
-        if(hour < 10)
+        if (hour < 10)
             hourStr = "0" + hour;
         else
             hourStr = hour + "";

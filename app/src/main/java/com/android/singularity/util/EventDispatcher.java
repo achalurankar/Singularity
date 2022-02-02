@@ -6,12 +6,12 @@ import java.util.List;
 public class EventDispatcher {
     static List<EventListener> listeners = new ArrayList<>();
 
-    public static void addEventListener(EventListener listener){
+    public static void addEventListener(EventListener listener) {
         EventDispatcher.listeners.add(listener);
     }
 
-    public static void callOnDataChange(){
-        for(EventListener eventListener : EventDispatcher.listeners){
+    public static void callOnDataChange() {
+        for (EventListener eventListener : EventDispatcher.listeners) {
             eventListener.onChange();
         }
     }

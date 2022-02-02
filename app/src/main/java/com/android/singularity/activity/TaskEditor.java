@@ -3,8 +3,6 @@ package com.android.singularity.activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -78,10 +76,10 @@ public class TaskEditor extends AppCompatActivity {
         }
 
         // frequency spinner population
-        if(taskType == Constants.TYPE_EMAIL) {
+        if (taskType == Constants.TYPE_EMAIL) {
             findViewById(R.id.frequency_layout).setVisibility(View.VISIBLE);
             frequencySpinner = findViewById(R.id.frequency_spinner);
-            String[] options = new String[] { "One time", "Daily", "Weekly", "Monthly" };
+            String[] options = new String[]{"One time", "Daily", "Weekly", "Monthly"};
             spinnerAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, options);
             spinnerAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
             frequencySpinner.setAdapter(spinnerAdapter);
@@ -151,7 +149,7 @@ public class TaskEditor extends AppCompatActivity {
             JSONObject params = new JSONObject();
             try {
                 String id = "";
-                if(mJSONObj != null)
+                if (mJSONObj != null)
                     id = mJSONObj.getString("Id");
                 requestStructure.put("id", id);
                 requestStructure.put("name", name);
@@ -179,7 +177,7 @@ public class TaskEditor extends AppCompatActivity {
                 public void onError(String error) {
                     TaskEditor.this.runOnUiThread(() -> {
                         String message = "Something went wrong!";
-                        if(error.contains("will never fire"))
+                        if (error.contains("will never fire"))
                             message = "Task time cannot be in past";
                         Toast.makeText(TaskEditor.this, message, Toast.LENGTH_SHORT).show();
                     });
@@ -200,7 +198,7 @@ public class TaskEditor extends AppCompatActivity {
                 Scheduler.schedule(task, this);
             }
         }
-        if(taskType != Constants.TYPE_EMAIL) {
+        if (taskType != Constants.TYPE_EMAIL) {
             //call event change listener invoker
             EventDispatcher.callOnDataChange();
             //close current activity
@@ -209,7 +207,7 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(findViewById(R.id.container).getWindowToken(), 0);
     }
 
@@ -246,7 +244,7 @@ public class TaskEditor extends AppCompatActivity {
         ConfirmBtn.setOnClickListener(v -> {
             int hours = timePicker.getHour();
             int minutes = timePicker.getMinute();
-            if(taskType == Constants.TYPE_EMAIL) {
+            if (taskType == Constants.TYPE_EMAIL) {
                 TimeTextView.setText(hours + ":" + minutes);
                 TimeValue = "";
                 dialog.dismiss();

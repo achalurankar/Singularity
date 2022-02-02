@@ -14,7 +14,7 @@ public class Scheduler {
 
     private static final String TAG = "Scheduler";
 
-    public static void schedule(Task task, Context context){
+    public static void schedule(Task task, Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         Calendar cal = Calendar.getInstance();
@@ -29,13 +29,13 @@ public class Scheduler {
         //time
         hour = Integer.parseInt(timeSplit[0]);
         minute = Integer.parseInt(timeSplit[1]);
-        if(timeSplit[2].equals("PM")){
+        if (timeSplit[2].equals("PM")) {
             //time is in PM
-            if(hour != 12) //if 12 do nothing
+            if (hour != 12) //if 12 do nothing
                 hour += 12;
         } else {
             //time is in AM
-            if(hour == 12) //if 12AM change it to 0 for 24 hr format
+            if (hour == 12) //if 12AM change it to 0 for 24 hr format
                 hour = 0;
         }
         second = 0;

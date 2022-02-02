@@ -48,13 +48,13 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.CustomViewHo
     @SuppressLint("NotifyDataSetChanged")
     public void add(int index, JSONObject item) {
         JSONArray jsonArray = new JSONArray();
-        if(index == mList.length()) {
+        if (index == mList.length()) {
             mList.put(item);
             notifyDataSetChanged();
             return;
         }
         for (int i = 0; i < mList.length(); i++) {
-            if(i == index) {
+            if (i == index) {
                 jsonArray.put(item);
             }
             try {
@@ -90,7 +90,7 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.CustomViewHo
             });
             String tt = task.getString("Display_Date_Time__c");
             String[] tt_arr = tt.split(" ");
-            if(task.getString("Frequency__c").equals("One time"))
+            if (task.getString("Frequency__c").equals("One time"))
                 tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2];
             else
                 tt = task.getString("Frequency__c");

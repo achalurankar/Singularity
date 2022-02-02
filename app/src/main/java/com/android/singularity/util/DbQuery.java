@@ -44,9 +44,9 @@ public class DbQuery {
 
     // get tasks for a input date
     public List<Task> getTasks(int type) {
-        String[] args = new String[] { String.valueOf(type) };
+        String[] args = new String[]{String.valueOf(type)};
         Cursor cursor;
-        if(type == Constants.TYPE_NOTE) {
+        if (type == Constants.TYPE_NOTE) {
             cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY task_id;", args);
         } else
             cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY is_completed, date_time;", args);
@@ -80,7 +80,7 @@ public class DbQuery {
         String[] args = new String[]{taskId};
         Cursor cursor = ref.rawQuery("SELECT * from tasks WHERE task_id = ?", args);
         cursor.moveToFirst();
-        if(cursor.getCount() == 0)  return null;
+        if (cursor.getCount() == 0) return null;
 
         int id, taskType;
         String name, desc, date, time;
@@ -100,13 +100,13 @@ public class DbQuery {
         //setting row values
         boolean isUpdate = false;
         ContentValues rows = new ContentValues();
-        if(task.getId() != 0) {
+        if (task.getId() != 0) {
             isUpdate = true;
         }
         rows.put("task_name", task.getName());
         rows.put("description", task.getDescription());
         rows.put("task_type", task.getTaskType());
-        if(task.getTaskType() == Constants.TYPE_ALERT) {
+        if (task.getTaskType() == Constants.TYPE_ALERT) {
             rows.put("task_date", task.getDate());
             rows.put("task_time", task.getTime());
             rows.put("is_notified", task.getIsNotified());
@@ -115,7 +115,7 @@ public class DbQuery {
             rows.put("date_time", dateTimeValue);
         }
 
-        if(isUpdate) {
+        if (isUpdate) {
             String[] args = new String[]{String.valueOf(task.getId())};
             ref.update("tasks", rows, "task_id = ?", args);
             return task.getId();
