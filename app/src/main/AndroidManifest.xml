@@ -27,6 +27,7 @@
         </activity>
 
         <receiver android:name=".service.NotificationReceiver" />
+        <receiver android:name=".service.SnoozeHandler" />
 
         <meta-data
             android:name="preloaded_fonts"

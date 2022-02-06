@@ -15,8 +15,16 @@ public class Scheduler {
     private static final String TAG = "Scheduler";
 
     public static void schedule(Task task, Context context) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        setExact(task, context, getCalendarForTask(task));
+    }
 
+    public static void snooze(Task task, Context context) {
+        Calendar calendar = getCalendarForTask(task);
+        calendar.add(Calendar.MINUTE, 15);
+        setExact(task, context, calendar);
+    }
+
+    private static Calendar getCalendarForTask(Task task) {
         Calendar cal = Calendar.getInstance();
         int year, month, date, hour, minute, second;
         String dateSplit[] = task.getDate().split("/");
@@ -40,12 +48,17 @@ public class Scheduler {
         }
         second = 0;
         cal.set(year, month, date, hour, minute, second);
-        Log.e(TAG, "schedule: date val " + task.getDate() + " time " + task.getTime());
+        return cal;
+    }
 
+    public static void setExact(Task task, Context context, Calendar calendar) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Log.e(TAG, "schedule: date val " + task.getDate() + " time " + task.getTime());
         Intent intent = new Intent(context, NotificationReceiver.class);
         intent.putExtra("taskId", String.valueOf(task.getId()));
         PendingIntent broadcast = PendingIntent.getBroadcast(context, task.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), broadcast);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), broadcast);
     }
+
+
 }
