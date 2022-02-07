@@ -19,7 +19,8 @@ public class Scheduler {
     }
 
     public static void snooze(Task task, Context context) {
-        Calendar calendar = getCalendarForTask(task);
+        // snooze for next 15 minutes
+        Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, 15);
         setExact(task, context, calendar);
     }
