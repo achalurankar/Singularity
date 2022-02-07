@@ -1,11 +1,16 @@
 package com.android.singularity.main;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.android.singularity.R;
@@ -17,6 +22,7 @@ import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import org.json.JSONObject;
 
@@ -96,7 +102,7 @@ public class ParentActivity extends AppCompatActivity {
     public void setupBottomNavBar() {
         bottomNavigationView = findViewById(R.id.nav_bar);
         bottomNavigationView.setSelectedItemId(R.id.alerts);
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
             if (bottomNavigationView.getSelectedItemId() == item.getItemId()) {
                 return false; // already in that fragment, no need to reopen same fragment
             }
@@ -111,9 +117,9 @@ public class ParentActivity extends AppCompatActivity {
                     transaction.replace(R.id.frame_layout, new TasksFragment());
                     break;
                 case R.id.notes:
-                    setAddBtnText("Add Note");
-                    transaction.replace(R.id.frame_layout, new NotesFragment());
-                    break;
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                    Log.e("TAG", "setupBottomNavBar: " + alarmManager.getNextAlarmClock());
+                    return false;
             }
             transaction.addToBackStack(null);
             transaction.commit();
