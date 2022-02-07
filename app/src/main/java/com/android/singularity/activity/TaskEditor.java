@@ -121,7 +121,6 @@ public class TaskEditor extends AppCompatActivity {
             taskId = mTask.getId();
         int isNotified = 0;
         int isCompleted = 0;
-        int frequency = Constants.freqTextVsIntMap.get(frequencySpinner.getSelectedItem());
 
         //validation
         if (name.length() == 0) {
@@ -184,6 +183,9 @@ public class TaskEditor extends AppCompatActivity {
                 }
             });
         } else {
+            int frequency = 0;
+            if(taskType == Constants.TYPE_ALERT)
+                frequency = Constants.freqTextVsIntMap.get(frequencySpinner.getSelectedItem());
             Task task = new Task(taskType, frequency, taskId, name, date, TimeValue, description, isNotified, isCompleted);
             DbQuery dbQuery = new DbQuery(this);
             task.setId(dbQuery.upsertTask(task));
