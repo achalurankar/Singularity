@@ -38,6 +38,7 @@ public class DbQuery {
                 "description VARCHAR, " +
                 "is_notified int DEFAULT 0, " +
                 "is_completed int DEFAULT 0, " +
+                "frequency int DEFAULT 1, " +
                 "task_type int, " +
                 "date_time DATETIME DEFAULT (datetime('now','localtime')));");
     }
@@ -56,6 +57,7 @@ public class DbQuery {
             int id, taskType;
             String name, desc, date, time;
             int isNotified, isCompleted;
+            int frequency;
             for (int i = 0; i < cursor.getCount(); i++) {
                 id = cursor.getInt(0);
                 name = cursor.getString(1);
@@ -64,8 +66,9 @@ public class DbQuery {
                 desc = cursor.getString(4);
                 isNotified = cursor.getInt(5);
                 isCompleted = cursor.getInt(6);
-                taskType = cursor.getInt(7);
-                Task task = new Task(taskType, id, name, date, time, desc, isNotified, isCompleted);
+                frequency = cursor.getInt(7);
+                taskType = cursor.getInt(8);
+                Task task = new Task(taskType, frequency, id, name, date, time, desc, isNotified, isCompleted);
                 tasks.add(task);
                 cursor.moveToNext();
             }
@@ -84,7 +87,7 @@ public class DbQuery {
 
         int id, taskType;
         String name, desc, date, time;
-        int isNotified, isCompleted;
+        int isNotified, isCompleted, frequency;
         id = cursor.getInt(0);
         name = cursor.getString(1);
         date = cursor.getString(2);
@@ -92,8 +95,9 @@ public class DbQuery {
         desc = cursor.getString(4);
         isNotified = cursor.getInt(5);
         isCompleted = cursor.getInt(6);
-        taskType = cursor.getInt(7);
-        return new Task(taskType, id, name, date, time, desc, isNotified, isCompleted);
+        frequency = cursor.getInt(7);
+        taskType = cursor.getInt(8);
+        return new Task(taskType, frequency, id, name, date, time, desc, isNotified, isCompleted);
     }
 
     public int upsertTask(Task task) {
@@ -111,6 +115,7 @@ public class DbQuery {
             rows.put("task_time", task.getTime());
             rows.put("is_notified", task.getIsNotified());
             rows.put("is_completed", task.getIsCompleted());
+            rows.put("frequency", task.getFrequency());
             String dateTimeValue = DateTime.getDateTimeValue(task.getDate(), task.getTime());
             rows.put("date_time", dateTimeValue);
         }

@@ -31,6 +31,8 @@ public class NotificationReceiver extends BroadcastReceiver {
         Task task = dbQuery.getTask(taskId);
         if (task != null && task.getIsNotified() == 0) {
             generateNotification(task, context);
+            Scheduler.setNextAlert(task, context); // set next alert for recurring tasks
+
         } else {
             Log.e(TAG, "onReceive: getTask returned null");
         }

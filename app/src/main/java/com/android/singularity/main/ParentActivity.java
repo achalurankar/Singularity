@@ -117,9 +117,9 @@ public class ParentActivity extends AppCompatActivity {
                     transaction.replace(R.id.frame_layout, new TasksFragment());
                     break;
                 case R.id.notes:
-                    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                    Log.e("TAG", "setupBottomNavBar: " + alarmManager.getNextAlarmClock());
-                    return false;
+                    setAddBtnText("Add Note");
+                    transaction.replace(R.id.frame_layout, new NotesFragment());
+                    break;
             }
             transaction.addToBackStack(null);
             transaction.commit();

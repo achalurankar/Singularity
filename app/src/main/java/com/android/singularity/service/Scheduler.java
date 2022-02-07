@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.android.singularity.modal.Task;
+import com.android.singularity.util.Constants;
 
 import java.util.Calendar;
 
@@ -62,4 +63,21 @@ public class Scheduler {
     }
 
 
+    public static void setNextAlert(Task task, Context context) {
+        Calendar calendar = getCalendarForTask(task);
+        switch (task.getFrequency()) {
+            case Constants.DAILY:
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                break;
+            case Constants.MONTHLY:
+                calendar.add(Calendar.MONTH, 1);
+                break;
+            case Constants.WEEKLY:
+                calendar.add(Calendar.DATE, 7);
+                break;
+            default:
+                return;
+        }
+        setExact(task, context, calendar);
+    }
 }

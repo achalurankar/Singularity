@@ -76,11 +76,10 @@ public class TaskEditor extends AppCompatActivity {
         }
 
         // frequency spinner population
-        if (taskType == Constants.TYPE_EMAIL) {
+        if (taskType == Constants.TYPE_EMAIL || taskType == Constants.TYPE_ALERT) {
             findViewById(R.id.frequency_layout).setVisibility(View.VISIBLE);
             frequencySpinner = findViewById(R.id.frequency_spinner);
-            String[] options = new String[]{"One time", "Daily", "Weekly", "Monthly"};
-            spinnerAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, options);
+            spinnerAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, Constants.frequencyOptions);
             spinnerAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
             frequencySpinner.setAdapter(spinnerAdapter);
         }
@@ -122,6 +121,7 @@ public class TaskEditor extends AppCompatActivity {
             taskId = mTask.getId();
         int isNotified = 0;
         int isCompleted = 0;
+        int frequency = Constants.freqTextVsIntMap.get(frequencySpinner.getSelectedItem());
 
         //validation
         if (name.length() == 0) {
@@ -184,7 +184,7 @@ public class TaskEditor extends AppCompatActivity {
                 }
             });
         } else {
-            Task task = new Task(taskType, taskId, name, date, TimeValue, description, isNotified, isCompleted);
+            Task task = new Task(taskType, frequency, taskId, name, date, TimeValue, description, isNotified, isCompleted);
             DbQuery dbQuery = new DbQuery(this);
             task.setId(dbQuery.upsertTask(task));
             if (mTask == null) {
