@@ -47,7 +47,7 @@ public class DbQuery {
         String[] args = new String[]{String.valueOf(type)};
         Cursor cursor;
         if (type == Constants.TYPE_NOTE) {
-            cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY task_id;", args);
+            cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY task_id DESC;", args);
         } else
             cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY is_completed, date_time;", args);
         cursor.moveToFirst();
