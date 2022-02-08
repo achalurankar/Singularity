@@ -24,6 +24,8 @@ import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;
 
+import java.util.Calendar;
+
 public class TaskEditor extends AppCompatActivity {
 
     EditText TaskName, Description;
@@ -80,9 +82,12 @@ public class TaskEditor extends AppCompatActivity {
     private void setupForm() {
         TaskName.setText(mTask.getName());
         Description.setText(mTask.getDescription());
-        Date.setText(mTask.getDate());
-        TimeTextView.setText(mTask.getTime());
-        TimeValue = mTask.getTime();
+        if(taskType == Constants.TYPE_ALERT) {
+            Date.setText(mTask.getDate());
+            TimeTextView.setText(mTask.getTime());
+            TimeValue = mTask.getTime();
+            frequencySpinner.setSelection(mTask.getFrequency() - 1);
+        }
     }
 
     private void updateTask() {
@@ -115,10 +120,25 @@ public class TaskEditor extends AppCompatActivity {
 
         //upsert task
         int frequency = 0;
+        boolean pastRecurring = false; // recurring task which has time in past
         Task task = new Task(taskType, frequency, taskId, name, date, TimeValue, description, isNotified, isCompleted);
         if(taskType == Constants.TYPE_ALERT) {
             task.setFrequency(Constants.freqTextVsIntMap.get(frequencySpinner.getSelectedItem()));
-            task.setCurrentSchedule(Scheduler.getCalendarForTask(task).getTimeInMillis());
+            long taskTimeInMillis = Scheduler.getCalendarForTask(task).getTimeInMillis();
+            long currentTime = System.currentTimeMillis();
+            // check if time is in past
+            if(taskTimeInMillis <= currentTime) {
+                // if task is one time
+                if(task.getFrequency() == Constants.ONE_TIME) {
+                    // cannot add task with time in past for one time tasks
+                    Toast.makeText(TaskEditor.this, "Time cannot be in past for one time tasks", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    // if time is in past but task is recurring
+                    pastRecurring = true;
+                }
+            }
+            task.setCurrentSchedule(taskTimeInMillis);
         }
         DbQuery dbQuery = new DbQuery(this);
         task.setId(dbQuery.upsertTask(task));
@@ -129,8 +149,11 @@ public class TaskEditor extends AppCompatActivity {
         }
 
         if (taskType == Constants.TYPE_ALERT) {
-            // schedule task in future
-            Scheduler.schedule(task, this);
+            // schedule task
+            if(pastRecurring)
+                Scheduler.setNextAlert(task, this); // if time is in past and frequency is recurring
+            else
+                Scheduler.schedule(task, this); // if time is not in past
         }
         EventDispatcher.callOnDataChange();
         finish();
