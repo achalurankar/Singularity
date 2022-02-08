@@ -79,8 +79,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.CustomViewHold
         String time = tt_arr[0] + ":" + tt_arr[1] + " " + task_med; // time
         String date = DateTime.getDisplayDate(task.getDate()); // date
         holder.Time.setText(time);
-        if(task.getFrequency() != Constants.ONE_TIME) {
-            date = Constants.frequencyOptions[task.getFrequency() - 1];
+        switch (task.getFrequency()) {
+            case Constants.WEEKLY:
+                date = DateTime.getDayOfWeek(task.getDate()) + "s";
+                break;
+            case Constants.MONTHLY:
+                break;
+            case Constants.DAILY:
+                date = Constants.frequencyOptions[task.getFrequency() - 1];
+                break;
         }
         holder.Date.setText(date);
         //check status of task

@@ -161,7 +161,7 @@ public class DateTime {
             obj = dateFormat.parse(date);
             return dayFormat.format(obj);
         } catch (ParseException e) {
-            System.out.println("Unparseable using " + e.getMessage());
+            Log.e(TAG, "getDayOfWeek: input date cannot be parsed \n" + e.getMessage());
         }
         return "";
     }
