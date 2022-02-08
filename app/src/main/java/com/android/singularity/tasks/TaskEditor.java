@@ -22,6 +22,7 @@ import com.android.singularity.service.Scheduler;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
+import com.android.singularity.util.EventDispatcher;
 
 public class TaskEditor extends AppCompatActivity {
 
@@ -130,6 +131,8 @@ public class TaskEditor extends AppCompatActivity {
             // schedule task in future
             Scheduler.schedule(task, this);
         }
+        EventDispatcher.callOnDataChange();
+        finish();
     }
 
     private void hideKeyboard() {
