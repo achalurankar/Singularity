@@ -5,6 +5,7 @@ public class Task {
     String name, date, time, description;
     int frequency;
     int isNotified, isCompleted;
+    long currentSchedule;
 
     public Task() {
 
@@ -20,6 +21,14 @@ public class Task {
         this.description = description;
         this.isNotified = isNotified;
         this.isCompleted = isCompleted;
+    }
+
+    public long getCurrentSchedule() {
+        return currentSchedule;
+    }
+
+    public void setCurrentSchedule(long currentSchedule) {
+        this.currentSchedule = currentSchedule;
     }
 
     public int getFrequency() {

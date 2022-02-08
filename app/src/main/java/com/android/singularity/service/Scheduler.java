@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
+import com.android.singularity.util.DbQuery;
 
 import java.util.Calendar;
 
@@ -26,7 +27,7 @@ public class Scheduler {
         setExact(task, context, calendar);
     }
 
-    private static Calendar getCalendarForTask(Task task) {
+    public static Calendar getCalendarForTask(Task task) {
         Calendar cal = Calendar.getInstance();
         int year, month, date, hour, minute, second;
         String dateSplit[] = task.getDate().split("/");
@@ -64,7 +65,8 @@ public class Scheduler {
 
 
     public static void setNextAlert(Task task, Context context) {
-        Calendar calendar = getCalendarForTask(task);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(task.getCurrentSchedule());
         switch (task.getFrequency()) {
             case Constants.DAILY:
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
@@ -78,6 +80,9 @@ public class Scheduler {
             default:
                 return;
         }
+        task.setCurrentSchedule(calendar.getTimeInMillis());
+        DbQuery dbQuery = new DbQuery(context);
+        dbQuery.upsertTask(task);
         setExact(task, context, calendar);
     }
 }

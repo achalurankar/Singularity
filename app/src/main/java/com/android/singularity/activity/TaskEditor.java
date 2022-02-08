@@ -29,6 +29,7 @@ import com.andromeda.calloutmanager.CalloutManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -187,6 +188,7 @@ public class TaskEditor extends AppCompatActivity {
             if(taskType == Constants.TYPE_ALERT)
                 frequency = Constants.freqTextVsIntMap.get(frequencySpinner.getSelectedItem());
             Task task = new Task(taskType, frequency, taskId, name, date, TimeValue, description, isNotified, isCompleted);
+            task.setCurrentSchedule(Scheduler.getCalendarForTask(task).getTimeInMillis());
             DbQuery dbQuery = new DbQuery(this);
             task.setId(dbQuery.upsertTask(task));
             if (mTask == null) {
