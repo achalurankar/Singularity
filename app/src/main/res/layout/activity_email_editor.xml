@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp">
+
+    <RelativeLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="5dp"
+            android:src="@drawable/back_vector"
+            app:tint="@color/label" />
+        <!--Form-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical">
+
+            <!--            Header-->
+            <TextView
+                android:id="@+id/header_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="5dp"
+                android:text="Add New Task"
+                android:textColor="@color/task_adder_tv_color"
+                android:textSize="18sp" />
+
+            <!--            Icon-->
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="15dp"
+                android:src="@drawable/add_task_icon" />
+
+            <!--            task name title-->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/form_text_views_padding"
+                android:text="Task name"
+                android:textColor="@color/task_adder_tv_color"
+                android:textSize="@dimen/form_text_views_size" />
+
+            <!--            task name edit text-->
+            <EditText
+                android:id="@+id/task_name_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/form_et_bg"
+                android:fontFamily="@font/bubblegum_sans"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="5dp"
+                android:textColor="@color/task_adder_value"
+                android:textSize="15sp" />
+
+            <!--            date title-->
+            <TextView
+                android:id="@+id/date_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="@dimen/form_text_views_padding"
+                android:text="Date"
+                android:textColor="@color/task_adder_tv_color"
+                android:textSize="@dimen/form_text_views_size" />
+
+            <!--            date selector-->
+            <RelativeLayout
+                android:id="@+id/date_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/form_et_bg">
+
+                <TextView
+                    android:id="@+id/date_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/form_text_views_padding"
+                    android:text="Select date"
+                    android:textColor="@color/task_adder_value"
+                    android:textSize="@dimen/form_text_views_size" />
+
+                <ImageView
+                    android:id="@+id/calendar"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/calendar_vector"
+                    app:tint="@color/dark_label" />
+
+            </RelativeLayout>
+
+            <!--            time title-->
+            <TextView
+                android:id="@+id/time_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="@dimen/form_text_views_padding"
+                android:text="Time"
+                android:textColor="@color/task_adder_tv_color"
+                android:textSize="@dimen/form_text_views_size" />
+
+            <!--            time selector-->
+            <RelativeLayout
+                android:id="@+id/time_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/form_et_bg">
+
+                <TextView
+                    android:id="@+id/time_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/form_text_views_padding"
+                    android:text="Select time"
+                    android:textColor="@color/task_adder_value"
+                    android:textSize="@dimen/form_text_views_size" />
+
+
+                <ImageView
+                    android:id="@+id/clock"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/clock_vector"
+                    app:tint="@color/dark_label" />
+
+            </RelativeLayout>
+
+            <!--            description title-->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="@dimen/form_text_views_padding"
+                android:text="Description (Optional)"
+                android:textColor="@color/task_adder_tv_color"
+                android:textSize="@dimen/form_text_views_size" />
+
+            <!--            description edit text-->
+            <EditText
+                android:id="@+id/description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/form_et_bg"
+                android:fontFamily="@font/bubblegum_sans"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="5dp"
+                android:textColor="@color/task_adder_value"
+                android:textSize="15sp" />
+
+            <!--            frequency layout-->
+            <LinearLayout
+                android:id="@+id/frequency_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="vertical">
+                <!--            reminder frequency title-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:padding="@dimen/form_text_views_padding"
+                    android:text="Reminder Frequency"
+                    android:textColor="@color/task_adder_tv_color"
+                    android:textSize="@dimen/form_text_views_size" />
+
+                <!--            frequency spinner-->
+                <Spinner
+                    android:id="@+id/frequency_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:background="@drawable/form_et_bg"
+                    android:prompt="@string/app_name"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <!--            <EditText-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginTop="20dp"-->
+            <!--                android:background="@drawable/form_et_bg"-->
+            <!--                android:fontFamily="@font/bubblegum_sans"-->
+            <!--                android:paddingLeft="10dp"-->
+            <!--                android:paddingTop="5dp"-->
+            <!--                android:paddingRight="10dp"-->
+            <!--                android:paddingBottom="5dp"-->
+            <!--                android:textColor="@color/task_adder_value"-->
+            <!--                android:textSize="15sp" />-->
+
+            <!--            save btn-->
+            <RelativeLayout
+                android:id="@+id/save_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/save_btn_bg"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="5dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="3dp"
+                    android:text="save"
+                    android:textColor="@color/white"
+                    android:textSize="19sp" />
+            </RelativeLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

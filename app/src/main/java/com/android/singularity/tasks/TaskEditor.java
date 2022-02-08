@@ -1,4 +1,4 @@
-package com.android.singularity.activity;
+package com.android.singularity.tasks;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -17,21 +17,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.singularity.R;
-import com.android.singularity.main.ParentActivity;
-import com.android.singularity.modal.Task;
+import com.android.singularity.activity.ParentActivity;
 import com.android.singularity.service.Scheduler;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.android.singularity.util.DbQuery;
-import com.android.singularity.util.EventDispatcher;
-import com.andromeda.calloutmanager.CalloutManager;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TaskEditor extends AppCompatActivity {
 
@@ -40,7 +30,6 @@ public class TaskEditor extends AppCompatActivity {
     TextView Date, TimeTextView;
     String TimeValue = "Select time";
     Task mTask;
-    JSONObject mJSONObj;
     int taskType;
     // spinner
     Spinner frequencySpinner;
@@ -64,10 +53,7 @@ public class TaskEditor extends AppCompatActivity {
         SaveBtn.setOnClickListener(v -> updateTask());
         findViewById(R.id.back).setOnClickListener(v -> finish());
         taskType = getIntent().getIntExtra("type", 0);
-        if (taskType == Constants.TYPE_EMAIL)
-            mJSONObj = ParentActivity.selectedJSONObj;
-        else
-            mTask = ParentActivity.selectedTask;
+        mTask = ParentActivity.selectedTask;
         if (taskType == Constants.TYPE_NOTE) {
             CalendarBtn.setVisibility(View.GONE);
             ClockBtn.setVisibility(View.GONE);
@@ -77,40 +63,25 @@ public class TaskEditor extends AppCompatActivity {
         }
 
         // frequency spinner population
-        if (taskType == Constants.TYPE_EMAIL || taskType == Constants.TYPE_ALERT) {
+        if (taskType == Constants.TYPE_ALERT) {
             findViewById(R.id.frequency_layout).setVisibility(View.VISIBLE);
             frequencySpinner = findViewById(R.id.frequency_spinner);
             spinnerAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, Constants.frequencyOptions);
             spinnerAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
             frequencySpinner.setAdapter(spinnerAdapter);
         }
-        if (mTask != null || mJSONObj != null) {
+        if (mTask != null) {
             setupForm();
         } else
             Date.setText(new DateTime().getDateForUser());
     }
 
     private void setupForm() {
-        if (taskType == Constants.TYPE_EMAIL) {
-            Map<String, String> datetime = new HashMap<>();
-            try {
-                datetime = DateTime.getDateTimeForEditorForm(mJSONObj.getString("Display_Date_Time__c"));
-                TaskName.setText(mJSONObj.getString("Name"));
-                frequencySpinner.setSelection(spinnerAdapter.getPosition(mJSONObj.getString("Frequency__c")));
-                //if no value, it will throw exception
-                Description.setText(mJSONObj.getString("Description__c"));
-            } catch (JSONException ignored) {
-            }
-            Date.setText(datetime.get("date"));
-            TimeTextView.setText(datetime.get("time"));
-            TimeValue = "";
-        } else {
-            TaskName.setText(mTask.getName());
-            Description.setText(mTask.getDescription());
-            Date.setText(mTask.getDate());
-            TimeTextView.setText(mTask.getTime());
-            TimeValue = mTask.getTime();
-        }
+        TaskName.setText(mTask.getName());
+        Description.setText(mTask.getDescription());
+        Date.setText(mTask.getDate());
+        TimeTextView.setText(mTask.getTime());
+        TimeValue = mTask.getTime();
     }
 
     private void updateTask() {
@@ -142,71 +113,22 @@ public class TaskEditor extends AppCompatActivity {
         }
 
         //upsert task
-        if (taskType == Constants.TYPE_EMAIL) {
-            String time = TimeTextView.getText().toString();
-            String gmtDateTimeValue = DateTime.getGMTDateTime(date, time);
-            JSONObject requestStructure = new JSONObject();
-            JSONObject params = new JSONObject();
-            try {
-                String id = "";
-                if (mJSONObj != null)
-                    id = mJSONObj.getString("Id");
-                requestStructure.put("id", id);
-                requestStructure.put("name", name);
-                requestStructure.put("taskTime", gmtDateTimeValue);
-                requestStructure.put("isCompleted", false);
-                requestStructure.put("description", description);
-                requestStructure.put("frequency", frequencySpinner.getSelectedItem());
-                requestStructure.put("action", "upsert");
-                params.put("requestStructure", requestStructure.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
-                @Override
-                public void onSuccess(String s) {
-                    TaskEditor.this.runOnUiThread(() -> {
-                        //call event change listener invoker
-                        EventDispatcher.callOnDataChange();
-                        //close current activity
-                        TaskEditor.this.finish();
-                    });
-                }
-
-                @Override
-                public void onError(String error) {
-                    TaskEditor.this.runOnUiThread(() -> {
-                        String message = "Something went wrong!";
-                        if (error.contains("will never fire"))
-                            message = "Task time cannot be in past";
-                        Toast.makeText(TaskEditor.this, message, Toast.LENGTH_SHORT).show();
-                    });
-                }
-            });
+        int frequency = 0;
+        if(taskType == Constants.TYPE_ALERT)
+            frequency = Constants.freqTextVsIntMap.get(frequencySpinner.getSelectedItem());
+        Task task = new Task(taskType, frequency, taskId, name, date, TimeValue, description, isNotified, isCompleted);
+        task.setCurrentSchedule(Scheduler.getCalendarForTask(task).getTimeInMillis());
+        DbQuery dbQuery = new DbQuery(this);
+        task.setId(dbQuery.upsertTask(task));
+        if (mTask == null) {
+            Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
         } else {
-            int frequency = 0;
-            if(taskType == Constants.TYPE_ALERT)
-                frequency = Constants.freqTextVsIntMap.get(frequencySpinner.getSelectedItem());
-            Task task = new Task(taskType, frequency, taskId, name, date, TimeValue, description, isNotified, isCompleted);
-            task.setCurrentSchedule(Scheduler.getCalendarForTask(task).getTimeInMillis());
-            DbQuery dbQuery = new DbQuery(this);
-            task.setId(dbQuery.upsertTask(task));
-            if (mTask == null) {
-                Toast.makeText(getApplicationContext(), "Task added!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
-            }
-
-            if (taskType == Constants.TYPE_ALERT) {
-                // schedule task in future
-                Scheduler.schedule(task, this);
-            }
+            Toast.makeText(getApplicationContext(), "Task updated!", Toast.LENGTH_SHORT).show();
         }
-        if (taskType != Constants.TYPE_EMAIL) {
-            //call event change listener invoker
-            EventDispatcher.callOnDataChange();
-            //close current activity
-            finish();
+
+        if (taskType == Constants.TYPE_ALERT) {
+            // schedule task in future
+            Scheduler.schedule(task, this);
         }
     }
 
@@ -248,12 +170,6 @@ public class TaskEditor extends AppCompatActivity {
         ConfirmBtn.setOnClickListener(v -> {
             int hours = timePicker.getHour();
             int minutes = timePicker.getMinute();
-            if (taskType == Constants.TYPE_EMAIL) {
-                TimeTextView.setText(hours + ":" + minutes);
-                TimeValue = "";
-                dialog.dismiss();
-                return;
-            }
             String meridiem = "";
             //converting to 12hr format for user perspective
             if (hours > 12) {

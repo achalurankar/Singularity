@@ -1,4 +1,4 @@
-package com.android.singularity.adapter;
+package com.android.singularity.email;
 
 
 import android.annotation.SuppressLint;
@@ -15,8 +15,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
-import com.android.singularity.main.ParentActivity;
-import com.android.singularity.modal.Task;
+import com.android.singularity.activity.ParentActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

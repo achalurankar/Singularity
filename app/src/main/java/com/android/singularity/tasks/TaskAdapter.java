@@ -1,4 +1,4 @@
-package com.android.singularity.adapter;
+package com.android.singularity.tasks;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
@@ -15,8 +15,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
-import com.android.singularity.main.ParentActivity;
-import com.android.singularity.modal.Task;
+import com.android.singularity.activity.ParentActivity;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 

@@ -13,11 +13,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Singularity.Dark">
         <activity
-            android:name=".main.ParentActivity"
+            android:name=".email.EmailEditor"
             android:exported="false" />
-        <activity android:name=".activity.TaskEditor" />
+        <activity
+            android:name=".activity.ParentActivity"
+            android:exported="false" />
+        <activity android:name=".tasks.TaskEditor" />
         <activity android:name=".activity.Groups" />
-        <activity android:name=".activity.Splash"
+        <activity
+            android:name=".activity.Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

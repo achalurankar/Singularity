@@ -1,28 +1,23 @@
-package com.android.singularity.main;
+package com.android.singularity.activity;
 
-import androidx.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-import android.widget.TextView;
-
 import com.android.singularity.R;
-import com.android.singularity.activity.TaskEditor;
-import com.android.singularity.fragment.EmailFragment;
-import com.android.singularity.fragment.NotesFragment;
-import com.android.singularity.fragment.TasksFragment;
-import com.android.singularity.modal.Task;
+import com.android.singularity.email.EmailEditor;
+import com.android.singularity.tasks.TaskEditor;
+import com.android.singularity.email.EmailFragment;
+import com.android.singularity.tasks.NotesFragment;
+import com.android.singularity.tasks.TasksFragment;
+import com.android.singularity.tasks.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 
 import org.json.JSONObject;
 
@@ -74,12 +69,14 @@ public class ParentActivity extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     private void openEditor(Task task, JSONObject jsonObject) {
         int type;
+        Class editor = TaskEditor.class;
         switch (bottomNavigationView.getSelectedItemId()) {
             case R.id.alerts:
                 type = Constants.TYPE_ALERT;
                 break;
             case R.id.email:
                 type = Constants.TYPE_EMAIL;
+                editor = EmailEditor.class;
                 break;
             case R.id.notes:
                 type = Constants.TYPE_NOTE;
@@ -92,7 +89,7 @@ public class ParentActivity extends AppCompatActivity {
         } else {
             selectedJSONObj = jsonObject;
         }
-        Intent intent = new Intent(getApplicationContext(), TaskEditor.class);
+        Intent intent = new Intent(getApplicationContext(), editor);
         intent.putExtra("type", type);
         startActivity(intent);
         overridePendingTransition(0, 0);

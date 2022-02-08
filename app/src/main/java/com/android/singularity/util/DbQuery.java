@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.android.singularity.modal.Task;
+import com.android.singularity.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;

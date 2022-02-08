@@ -1,4 +1,4 @@
-package com.android.singularity.fragment;
+package com.android.singularity.tasks;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
-import com.android.singularity.adapter.TaskAdapter;
-import com.android.singularity.modal.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DbQuery;
 import com.android.singularity.util.EventDispatcher;

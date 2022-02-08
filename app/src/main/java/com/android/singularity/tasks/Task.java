@@ -1,4 +1,4 @@
-package com.android.singularity.modal;
+package com.android.singularity.tasks;
 
 public class Task {
     int id, taskType;

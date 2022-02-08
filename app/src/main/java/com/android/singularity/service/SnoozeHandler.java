@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.android.singularity.modal.Task;
+import com.android.singularity.tasks.Task;
 import com.android.singularity.util.DbQuery;
 
 public class SnoozeHandler extends BroadcastReceiver {

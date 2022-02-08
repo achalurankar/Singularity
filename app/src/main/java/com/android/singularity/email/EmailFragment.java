@@ -1,4 +1,4 @@
-package com.android.singularity.fragment;
+package com.android.singularity.email;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
-import com.android.singularity.adapter.EmailAdapter;
+import com.android.singularity.email.EmailAdapter;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.util.Loader;

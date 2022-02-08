@@ -8,7 +8,6 @@ import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.singularity.R;
-import com.android.singularity.main.ParentActivity;
 import com.android.singularity.util.Constants;
 import com.andromeda.calloutmanager.Session;
 

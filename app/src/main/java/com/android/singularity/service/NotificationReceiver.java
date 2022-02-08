@@ -15,7 +15,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.android.singularity.R;
-import com.android.singularity.modal.Task;
+import com.android.singularity.tasks.Task;
 import com.android.singularity.util.DbQuery;
 
 public class NotificationReceiver extends BroadcastReceiver {
