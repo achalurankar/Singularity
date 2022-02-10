@@ -51,7 +51,7 @@ public class DbQuery {
         if (type == Constants.TYPE_NOTE) {
             cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY task_id DESC;", args);
         } else
-            cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY is_completed, date_time;", args);
+            cursor = ref.rawQuery("SELECT * from tasks WHERE task_type = ? ORDER BY current_schedule;", args);
         cursor.moveToFirst();
         List<Task> tasks = new ArrayList<>();
         if (cursor.getCount() != 0) {
