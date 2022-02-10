@@ -9,6 +9,7 @@ import android.util.Log;
 import com.android.singularity.tasks.Task;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.DbQuery;
+import com.android.singularity.util.PreferenceManager;
 
 import java.util.Calendar;
 
@@ -24,6 +25,7 @@ public class Scheduler {
         // snooze for next 15 minutes
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, 15);
+        PreferenceManager.setSnoozed(context, task.getId(), true); // set snooze flag for this task
         setExact(task, context, calendar);
     }
 
@@ -80,9 +82,14 @@ public class Scheduler {
             default:
                 return;
         }
-        task.setCurrentSchedule(calendar.getTimeInMillis());
-        DbQuery dbQuery = new DbQuery(context);
-        dbQuery.upsertTask(task);
+        if(!PreferenceManager.isSnoozed(context, task.getId())) {
+            task.setCurrentSchedule(calendar.getTimeInMillis());
+            DbQuery dbQuery = new DbQuery(context);
+            dbQuery.upsertTask(task);
+        }
+        else {
+            PreferenceManager.setSnoozed(context, task.getId(), false); // unset snooze flag for this task
+        }
         setExact(task, context, calendar);
     }
 }
