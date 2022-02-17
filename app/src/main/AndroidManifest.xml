@@ -32,6 +32,7 @@
 
         <receiver android:name=".service.NotificationReceiver" />
         <receiver android:name=".service.SnoozeHandler" />
+        <receiver android:name=".service.DeleteHandler" />
 
         <meta-data
             android:name="preloaded_fonts"

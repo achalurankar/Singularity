@@ -46,12 +46,19 @@ public class NotificationReceiver extends BroadcastReceiver {
         PendingIntent snoozePendingIntent = PendingIntent.getBroadcast(context,
                 0, snoozeHandlerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        // create delete action intent
+        Intent deleteHandlerIntent = new Intent(context, DeleteHandler.class);
+        deleteHandlerIntent.putExtra("taskId", String.valueOf(task.getId()));
+        PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context,
+                1, deleteHandlerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.app_icon_vector)
                 .setContentTitle(task.getName())
                 .setColor(ContextCompat.getColor(context, R.color.orange))
                 .setAutoCancel(true)
-                .addAction(R.drawable.app_icon_vector, "Snooze", snoozePendingIntent);
+                .addAction(R.drawable.app_icon_vector, "Snooze", snoozePendingIntent)
+                .addAction(R.drawable.app_icon_vector, "Delete", deletePendingIntent);
 
         if (task.getDescription().length() < 35) {
             if (task.getDescription().length() == 0) {
