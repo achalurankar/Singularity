@@ -27,11 +27,10 @@ public class Splash extends AppCompatActivity {
     }
 
     private void openActivity() {
-        //splash for 1 second = 1000 milliseconds
         new Handler().postDelayed(() -> {
             startActivity(new Intent(Splash.this, ParentActivity.class));
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
-        }, 1000);
+        }, 500);
     }
 }
