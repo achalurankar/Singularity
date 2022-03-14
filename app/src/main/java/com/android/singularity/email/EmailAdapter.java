@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
 import com.android.singularity.activity.ParentActivity;
+import com.android.singularity.util.Constants;
+import com.android.singularity.util.DateTime;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -89,11 +91,19 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.CustomViewHo
             });
             String tt = task.getString("Display_Date_Time__c");
             String[] tt_arr = tt.split(" ");
-            if (task.getString("Frequency__c").equals("One time"))
-                tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2];
-            else
-                tt = task.getString("Frequency__c");
-            tt += "\n" + tt_arr[3];
+            switch (task.getString("Frequency__c")) {
+                case "One time":
+                    tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2];
+                    break;
+                case "Daily":
+                case "Monthly":
+                    tt = task.getString("Frequency__c");
+                    break;
+                case "Weekly":
+                    tt = DateTime.getDayOfWeek(tt_arr);
+                    break;
+            }
+            tt += "\n" + DateTime.get12HrFormatTime(tt_arr[3]);
             holder.Time.setText(tt);
 //            holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
             //check status of task

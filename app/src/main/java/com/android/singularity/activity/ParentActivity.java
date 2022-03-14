@@ -49,7 +49,7 @@ public class ParentActivity extends AppCompatActivity {
         setDayDate(currentDate);
         //load tasks fragment  initially
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, new TasksFragment());
+        transaction.replace(R.id.frame_layout, new EmailFragment());
         transaction.addToBackStack(null);
         transaction.commit();
         setupBottomNavBar();

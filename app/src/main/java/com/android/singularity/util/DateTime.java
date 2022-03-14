@@ -111,6 +111,36 @@ public class DateTime {
         }
     }
 
+    public static String getDayOfWeek(String[] tt) {
+        tt[1] = "" + nameVsNumberMap.get(tt[1]);
+        try {
+            Date obj;
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            DateFormat dayFormat = new SimpleDateFormat("EEEE");
+            obj = dateFormat.parse(tt[0] + "/" + tt[1] + "/" + tt[2]);
+            return dayFormat.format(obj) + "s";
+        } catch (Exception e) {
+            Log.e(TAG, "getDayOfWeek: \n", e);
+        }
+        return "";
+    }
+
+    public static String get12HrFormatTime(String s) {
+        String time[] = s.split(":");
+        int hr = Integer.parseInt(time[0]);
+        String med = "PM";
+        if(hr > 12) {
+            hr -= 12;
+            med = " PM";
+        } else if(hr == 0) {
+            hr = 12;
+            med = " AM";
+        }
+        time[0] = hr < 10 ? "0" + hr : "" + hr;
+        time[1] = time[1].length() == 1 ? "0" + time[1] : time[1];
+        return time[0] + ":" + time[1] + med;
+    }
+
     //constructor function
     public void getCurrentDate() {
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
