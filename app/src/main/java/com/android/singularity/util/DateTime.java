@@ -135,6 +135,8 @@ public class DateTime {
         } else if(hr == 0) {
             hr = 12;
             med = " AM";
+        } else {
+            med = " AM";
         }
         time[0] = hr < 10 ? "0" + hr : "" + hr;
         time[1] = time[1].length() == 1 ? "0" + time[1] : time[1];

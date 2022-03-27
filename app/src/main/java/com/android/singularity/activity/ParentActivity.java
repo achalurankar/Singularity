@@ -98,7 +98,7 @@ public class ParentActivity extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     public void setupBottomNavBar() {
         bottomNavigationView = findViewById(R.id.nav_bar);
-        bottomNavigationView.setSelectedItemId(R.id.alerts);
+        bottomNavigationView.setSelectedItemId(R.id.email);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (bottomNavigationView.getSelectedItemId() == item.getItemId()) {
                 return false; // already in that fragment, no need to reopen same fragment
