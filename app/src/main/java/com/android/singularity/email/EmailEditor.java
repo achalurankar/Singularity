@@ -34,7 +34,7 @@ public class EmailEditor extends AppCompatActivity {
     RelativeLayout CalendarBtn, SaveBtn, ClockBtn;
     TextView Date, TimeTextView;
     String TimeValue = "Select time";
-    JSONObject mJSONObj;
+    TaskWrapper taskWrapper;
     // spinner
     Spinner frequencySpinner;
     ArrayAdapter spinnerAdapter;
@@ -56,7 +56,7 @@ public class EmailEditor extends AppCompatActivity {
         ClockBtn.setOnClickListener(v -> popupClock());
         SaveBtn.setOnClickListener(v -> updateTask());
         findViewById(R.id.back).setOnClickListener(v -> finish());
-        mJSONObj = ParentActivity.selectedJSONObj;
+        taskWrapper = ParentActivity.mTaskWrapper;
 
         // frequency spinner population
         findViewById(R.id.frequency_layout).setVisibility(View.VISIBLE);
@@ -65,22 +65,18 @@ public class EmailEditor extends AppCompatActivity {
         spinnerAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
         frequencySpinner.setAdapter(spinnerAdapter);
 
-        if (mJSONObj != null) {
+        if (taskWrapper != null) {
             setupForm();
         } else
             Date.setText(new DateTime().getDateForUser());
     }
 
     private void setupForm() {
-        Map<String, String> datetime = new HashMap<>();
-        try {
-            datetime = DateTime.getDateTimeForEditorForm(mJSONObj.getString("Display_Date_Time__c"));
-            TaskName.setText(mJSONObj.getString("Name"));
-            frequencySpinner.setSelection(spinnerAdapter.getPosition(mJSONObj.getString("Frequency__c")));
-            //if no value, it will throw exception
-            Description.setText(mJSONObj.getString("Description__c"));
-        } catch (JSONException ignored) {
-        }
+        Map<String, String> datetime = DateTime.getDateTimeForEditorForm(taskWrapper.displayDateTime);
+        TaskName.setText(taskWrapper.name);
+        frequencySpinner.setSelection(spinnerAdapter.getPosition(taskWrapper.frequency));
+        if (taskWrapper.description != null)
+            Description.setText(taskWrapper.description);
         Date.setText(datetime.get("date"));
         TimeTextView.setText(datetime.get("time"));
         TimeValue = "";
@@ -114,8 +110,8 @@ public class EmailEditor extends AppCompatActivity {
         JSONObject params = new JSONObject();
         try {
             String id = "";
-            if (mJSONObj != null)
-                id = mJSONObj.getString("Id");
+            if (taskWrapper != null)
+                id = taskWrapper.id;
             requestStructure.put("id", id);
             requestStructure.put("name", name);
             requestStructure.put("taskTime", gmtDateTimeValue);

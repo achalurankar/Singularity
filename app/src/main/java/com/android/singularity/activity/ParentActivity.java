@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.android.singularity.R;
 import com.android.singularity.email.EmailEditor;
+import com.android.singularity.email.TaskWrapper;
 import com.android.singularity.tasks.TaskEditor;
 import com.android.singularity.email.EmailFragment;
 import com.android.singularity.tasks.NotesFragment;
@@ -19,8 +20,6 @@ import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import org.json.JSONObject;
-
 public class ParentActivity extends AppCompatActivity {
 
     TextView DateTV, DayTV, AddBtnText;
@@ -29,12 +28,12 @@ public class ParentActivity extends AppCompatActivity {
     public interface ItemClickListener {
         void onClick(Task task);
 
-        void OnJSONObjectClick(JSONObject jsonObject);
+        void OnWrapperObjectClick(TaskWrapper jsonObject);
     }
 
     public static ItemClickListener itemClickListener;
     public static Task selectedTask;
-    public static JSONObject selectedJSONObj;
+    public static TaskWrapper mTaskWrapper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,14 +59,14 @@ public class ParentActivity extends AppCompatActivity {
             }
 
             @Override
-            public void OnJSONObjectClick(JSONObject jsonObject) {
-                openEditor(null, jsonObject);
+            public void OnWrapperObjectClick(TaskWrapper taskWrapper) {
+                openEditor(null, taskWrapper);
             }
         };
     }
 
     @SuppressLint("NonConstantResourceId")
-    private void openEditor(Task task, JSONObject jsonObject) {
+    private void openEditor(Task task, TaskWrapper taskWrapper) {
         int type;
         Class editor = TaskEditor.class;
         switch (bottomNavigationView.getSelectedItemId()) {
@@ -87,7 +86,7 @@ public class ParentActivity extends AppCompatActivity {
         if (type != Constants.TYPE_EMAIL) {
             selectedTask = task;
         } else {
-            selectedJSONObj = jsonObject;
+            mTaskWrapper = taskWrapper;
         }
         Intent intent = new Intent(getApplicationContext(), editor);
         intent.putExtra("type", type);

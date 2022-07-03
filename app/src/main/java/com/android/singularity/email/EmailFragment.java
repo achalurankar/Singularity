@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
-import com.android.singularity.email.EmailAdapter;
 import com.android.singularity.util.Constants;
 import com.android.singularity.util.EventDispatcher;
 import com.android.singularity.util.Loader;
@@ -28,6 +27,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EmailFragment extends Fragment {
 
     private static final String TAG = "TaskList";
@@ -36,7 +38,7 @@ public class EmailFragment extends Fragment {
     public static JSONObject selectedTask;
     EmailAdapter mAdapter;
     LinearLayout NoResultsLayout;
-    JSONArray mList;
+    List<TaskWrapper> mList = new ArrayList<>();
     View view;
 
     public EmailFragment() {
@@ -77,12 +79,16 @@ public class EmailFragment extends Fragment {
                     Loader.toggleLoading(view, R.id.loader, R.id.container);
                     try {
                         JSONArray jsonArray = new JSONArray(response);
-                        mList = jsonArray;
+                        mList.clear();
+                        for(int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            mList.add(new TaskWrapper(jsonObject));
+                        }
                         if (jsonArray.length() != 0) {
-                            setRecyclerViewAdapter(jsonArray);
+                            setRecyclerViewAdapter(mList);
                         } else {
                             NoResultsLayout.setVisibility(View.VISIBLE);
-                            setRecyclerViewAdapter(new JSONArray());
+                            setRecyclerViewAdapter(new ArrayList<>());
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -100,8 +106,8 @@ public class EmailFragment extends Fragment {
         });
     }
 
-    public void setRecyclerViewAdapter(JSONArray jsonArray) {
-        mAdapter = new EmailAdapter(getActivity(), jsonArray);
+    public void setRecyclerViewAdapter(List<TaskWrapper> tasks) {
+        mAdapter = new EmailAdapter(getActivity(), tasks);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -118,7 +124,7 @@ public class EmailFragment extends Fragment {
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 // Remove swiped item
                 int index = viewHolder.getLayoutPosition();
-                JSONObject item = mAdapter.get(index);
+                TaskWrapper item = mAdapter.get(index);
                 mAdapter.remove(index);
                 mAdapter.notifyDataSetChanged();
                 Snackbar snackbar = Snackbar.make(mRecyclerView, "Task removed!", 2500);
@@ -140,11 +146,11 @@ public class EmailFragment extends Fragment {
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
     }
 
-    private void removeFromDatabase(JSONObject item) {
+    private void removeFromDatabase(TaskWrapper item) {
         JSONObject requestStructure = new JSONObject();
         JSONObject params = new JSONObject();
         try {
-            requestStructure.put("id", item.getString("Id"));
+            requestStructure.put("id", item.id);
             requestStructure.put("action", "delete");
             params.put("requestStructure", requestStructure.toString());
             // no need to call get tasks as element is already removed from the view. hence no response listener required

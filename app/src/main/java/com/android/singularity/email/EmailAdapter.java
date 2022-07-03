@@ -16,29 +16,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.singularity.R;
 import com.android.singularity.activity.ParentActivity;
-import com.android.singularity.util.Constants;
 import com.android.singularity.util.DateTime;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.CustomViewHolder> {
     public final Context mContext;
-    JSONArray mList;
+    List<TaskWrapper> mList;
 
-    public EmailAdapter(Context context, JSONArray list) {
+    public EmailAdapter(Context context, List<TaskWrapper> list) {
         mContext = context;
         mList = list;
     }
 
-    public JSONObject get(int index) {
-        JSONObject object = null;
-        try {
-            object = this.mList.getJSONObject(index);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public TaskWrapper get(int index) {
+        TaskWrapper object = null;
+        object = this.mList.get(index);
         return object;
     }
 
@@ -47,22 +43,18 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.CustomViewHo
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void add(int index, JSONObject item) {
-        JSONArray jsonArray = new JSONArray();
-        if (index == mList.length()) {
-            mList.put(item);
+    public void add(int index, TaskWrapper item) {
+        List<TaskWrapper> jsonArray = new ArrayList<>();
+        if (index == mList.size()) {
+            mList.add(item);
             notifyDataSetChanged();
             return;
         }
-        for (int i = 0; i < mList.length(); i++) {
+        for (int i = 0; i < mList.size(); i++) {
             if (i == index) {
-                jsonArray.put(item);
+                jsonArray.add(item);
             }
-            try {
-                jsonArray.put(mList.getJSONObject(i));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            jsonArray.add(mList.get(i));
         }
         mList = jsonArray;
         notifyDataSetChanged();
@@ -77,54 +69,49 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.CustomViewHo
 
     @Override
     public void onBindViewHolder(@NonNull CustomViewHolder holder, final int position) {
-        JSONObject task;
-        try {
-            task = mList.getJSONObject(position);
-            holder.Name.setText(task.getString("Name"));
-            try {
-                holder.Description.setText(task.getString("Description__c"));
-            } catch (JSONException e) {
-                holder.Description.setText("No description provided");
-            }
-            holder.Item.setOnClickListener(v -> {
-                ParentActivity.itemClickListener.OnJSONObjectClick(task);
-            });
-            String tt = task.getString("Display_Date_Time__c");
-            String[] tt_arr = tt.split(" ");
-            switch (task.getString("Frequency__c")) {
-                case "One time":
-                    tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2];
-                    break;
-                case "Daily":
-                case "Monthly":
-                    tt = task.getString("Frequency__c");
-                    break;
-                case "Weekly":
-                    tt = DateTime.getDayOfWeek(tt_arr);
-                    break;
-            }
-            tt += "\n" + DateTime.get12HrFormatTime(tt_arr[3]);
-            holder.Time.setText(tt);
-//            holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
-            //check status of task
-            if (task.getBoolean("Is_Completed__c")) {
-                holder.CompleteBtn.setVisibility(View.INVISIBLE);
-                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
-            } else
-                holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        TaskWrapper task;
+        task = mList.get(position);
+        holder.Name.setText(task.name);
+
+        holder.Description.setText(task.description == null ? "No description provided" : task.description);
+
+        holder.Item.setOnClickListener(v -> {
+            ParentActivity.itemClickListener.OnWrapperObjectClick(task);
+        });
+        String tt = task.displayDateTime;
+        String[] tt_arr = tt.split(" ");
+        switch (task.frequency) {
+            case "One time":
+                tt = tt_arr[0] + " " + tt_arr[1] + " " + tt_arr[2];
+                break;
+            case "Daily":
+            case "Monthly":
+                tt = task.frequency;
+                break;
+            case "Weekly":
+                tt = DateTime.getDayOfWeek(tt_arr);
+                break;
         }
+        tt += "\n" + DateTime.get12HrFormatTime(tt_arr[3]);
+        holder.Time.setText(tt);
+//            holder.CompleteBtn.setOnClickListener(v -> setComplete(task));
+        //check status of task
+        if (task.isCompleted) {
+            holder.CompleteBtn.setVisibility(View.INVISIBLE);
+            holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.completed_status));
+        } else
+            holder.TaskStatus.setBackground(ContextCompat.getDrawable(mContext, R.drawable.pending_status));
+
 
     }
 
     @Override
     public int getItemCount() {
-        return mList.length();
+        return mList.size();
     }
 
 
-    public class CustomViewHolder extends RecyclerView.ViewHolder {
+    public static class CustomViewHolder extends RecyclerView.ViewHolder {
 
         View TaskStatus;
         TextView Name, Description, Time;
