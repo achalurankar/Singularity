@@ -1,5 +1,5 @@
 *.iml
-app/src/main/java/com/android/singularity/util/Constants.java
+app/src/main/java/com/android/singularity/util/Credentials.java
 .gradle
 /local.properties
 /.idea/caches
