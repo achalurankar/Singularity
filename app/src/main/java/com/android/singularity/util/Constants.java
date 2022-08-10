@@ -11,11 +11,11 @@ public class Constants {
     public static final int TYPE_EMAIL = 3;
 
     //credentials
-    private static final String USERNAME = "your_username";
-    private static final String PASSWORD = "your_password";
-    private static final String SECURITY_TOKEN = "your_security_token";
-    private static final String CLIENT_ID = "your_client_id";
-    private static final String CLIENT_SECRET = "your_client_secret";
+    private static final String USERNAME = Credentials.USERNAME;
+    private static final String PASSWORD = Credentials.PASSWORD;
+    private static final String SECURITY_TOKEN = Credentials.SECURITY_TOKEN;
+    private static final String CLIENT_ID = Credentials.CLIENT_ID;
+    private static final String CLIENT_SECRET = Credentials.CLIENT_SECRET;
 
     // api endpoints
     public static final String ACCESS_TOKEN_ENDPOINT = "https://login.salesforce.com/services/oauth2/token?grant_type=password&client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET +"&username=" + USERNAME + "&password=" + PASSWORD + SECURITY_TOKEN;
