@@ -11,8 +11,13 @@ public class Constants {
     public static final int TYPE_EMAIL = 3;
 
     // api endpoints
-    public static String ACCESS_TOKEN_ENDPOINT = "https://login.salesforce.com/services/oauth2/token?grant_type=password&client_id=" + Credentials.CLIENT_ID + "&client_secret=" + Credentials.CLIENT_SECRET +"&username=" + Credentials.USERNAME + "&password=" + Credentials.PASSWORD + Credentials.SECURITY_TOKEN;
-    public static String API_ENDPOINT = "https://playful-otter-5orsso-dev-ed.my.salesforce.com/services/apexrest/Todo";
+    public static String getAccessTokenEndpoint() {
+        return "https://login.salesforce.com/services/oauth2/token?grant_type=password&client_id=" + Credentials.CLIENT_ID + "&client_secret=" + Credentials.CLIENT_SECRET +"&username=" + Credentials.USERNAME + "&password=" + Credentials.PASSWORD + Credentials.SECURITY_TOKEN;
+    }
+
+    public static String getApiEndpoint() {
+        return "https://playful-otter-5orsso-dev-ed.my.salesforce.com/services/apexrest/Todo";
+    }
 
     // task frequency constants
     public static final int ONE_TIME = 1;

@@ -72,7 +72,7 @@ public class EmailFragment extends Fragment {
         Loader.toggleLoading(view, R.id.loader, R.id.container);
         NoResultsLayout.setVisibility(View.INVISIBLE);
         view.findViewById(R.id.loader).setVisibility(View.VISIBLE);
-        CalloutManager.makeCall(Constants.API_ENDPOINT, "GET", new JSONObject(), new CalloutManager.ResponseListener() {
+        CalloutManager.makeCall(Constants.getApiEndpoint(), "GET", new JSONObject(), new CalloutManager.ResponseListener() {
             @Override
             public void onSuccess(String response) {
                 getActivity().runOnUiThread(() -> {
@@ -154,7 +154,7 @@ public class EmailFragment extends Fragment {
             requestStructure.put("action", "delete");
             params.put("requestStructure", requestStructure.toString());
             // no need to call get tasks as element is already removed from the view. hence no response listener required
-            CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params);
+            CalloutManager.makeCall(Constants.getApiEndpoint(), "POST", params);
         } catch (JSONException e) {
             e.printStackTrace();
         }

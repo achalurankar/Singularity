@@ -23,7 +23,7 @@ public class Splash extends AppCompatActivity {
         //for full screen activity, removing status bar
         //store access token for future use
         if (!Session.isTokenValid)
-            Session.storeAccessToken(Constants.ACCESS_TOKEN_ENDPOINT);
+            Session.storeAccessToken(Constants.getAccessTokenEndpoint());
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //open first activity
         loadCredentials();
