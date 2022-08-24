@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.android.singularity.R;
 import com.android.singularity.email.EmailEditor;
 import com.android.singularity.email.TaskWrapper;
+import com.android.singularity.settings.SettingsFragment;
 import com.android.singularity.tasks.TaskEditor;
 import com.android.singularity.email.EmailFragment;
 import com.android.singularity.tasks.NotesFragment;
@@ -77,11 +78,8 @@ public class ParentActivity extends AppCompatActivity {
                 type = Constants.TYPE_EMAIL;
                 editor = EmailEditor.class;
                 break;
-            case R.id.notes:
-                type = Constants.TYPE_NOTE;
-                break;
             default:
-                type = 0;
+                type = Constants.TYPE_NOTE;
         }
         if (type != Constants.TYPE_EMAIL) {
             selectedTask = task;
@@ -115,6 +113,10 @@ public class ParentActivity extends AppCompatActivity {
                 case R.id.notes:
                     setAddBtnText("Add Note");
                     transaction.replace(R.id.frame_layout, new NotesFragment());
+                    break;
+                case R.id.credentials:
+                    setAddBtnText("Add Note");
+                    transaction.replace(R.id.frame_layout, new SettingsFragment());
                     break;
             }
             transaction.addToBackStack(null);

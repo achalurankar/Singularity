@@ -123,7 +123,7 @@ public class EmailEditor extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        CalloutManager.makeCall(Constants.API_ENDPOINT, "POST", params, new CalloutManager.ResponseListener() {
+        CalloutManager.makeCall(Constants.getApiEndpoint(), "POST", params, new CalloutManager.ResponseListener() {
             @Override
             public void onSuccess(String s) {
                 EmailEditor.this.runOnUiThread(() -> {

@@ -12,4 +12,9 @@
         android:id="@+id/notes"
         android:icon="@drawable/notes_selector"
         android:title="Notes"/>
+    <item
+        android:id="@+id/credentials"
+        android:icon="@drawable/lock_vector"
+        android:title="Creds"/>
+
 </menu>
