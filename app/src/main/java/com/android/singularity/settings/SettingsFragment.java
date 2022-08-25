@@ -10,9 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.android.singularity.R;
+import com.android.singularity.util.Constants;
 import com.android.singularity.util.Credentials;
+import com.andromeda.calloutmanager.Session;
 
 public class SettingsFragment extends Fragment {
 
@@ -56,7 +59,9 @@ public class SettingsFragment extends Fragment {
                 .putString("SECURITY_TOKEN", SecurityTokenET.getText().toString())
                 .putString("USERNAME", UsernameET.getText().toString())
                 .commit(); //immediate write
+        Toast.makeText(getActivity(), "Creds Saved", Toast.LENGTH_SHORT).show();
         loadCredentials();
+        Session.storeAccessToken(Constants.getAccessTokenEndpoint());
     }
 
     SharedPreferences sharedPref;
